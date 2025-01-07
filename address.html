@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>카사 주소 검색</title>
+
+  <!-- 다움 우편번호 검색 API -->
+  <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+  <script>
+    // Kakao 지도 SDK 동적 로드
+    (function loadKakaoMapSDK() {
+      const headElement = document.querySelector("head");
+      const scriptElement = document.createElement("script");
+      const kakaoAppKey = "6af8ae84e955959b562090cd7e087a02";
+
+      scriptElement.type = "text/javascript";
+      scriptElement.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoAppKey}&libraries=services&autoload=false`;
+
+      scriptElement.onload = function () {
+        daum.maps.load(function () {
+          daum.geocode = new daum.maps.services.Geocoder();
+        });
+      };
+
+      headElement.appendChild(scriptElement);
+    })();
+  </script>
+
+  <!-- 스타일 정의 -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    #layer {
+      position: fixed;
+      overflow: hidden;
+      z-index: 1;
+      -webkit-overflow-scrolling: touch;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <!-- 주소 검색 결과 레이어 -->
+  <div id="layer"></div>
+
+  <script>
+    // 객체 병합 함수 (ES6 spread 사용 가능)
+    function mergeObjects(target, ...sources) {
+      sources.forEach(source => {
+        Object.keys(source).forEach(key => {
+          target[key] = source[key];
+        });
+      });
+      return target;
+    }
+
+    // 좌표 검색 함수
+    function getCoordinates(address) {
+      return new Promise((resolve, reject) => {
+        daum.geocode.addressSearch(address, function (result, status) {
+          if (status === daum.maps.services.Status.OK) {
+            const { x: longitude, y: latitude } = result[0];
+            const addressInfo = result[0].address;
+            const { b_code, mountain_yn, main_address_no, sub_address_no } = addressInfo;
+
+            const pnu = `${b_code}${mountain_yn === "Y" ? "2" : "1"}${main_address_no.padStart(4, "0")}${sub_address_no.padStart(4, "0")}`;
+            resolve({ latLng: { latitude, longitude }, pnu });
+          } else {
+            reject("주소 검색 실패");
+          }
+        });
+      });
+    }
+
+    // 우편번호 검색 초기화
+    new daum.Postcode({
+      oncomplete: function (data) {
+        const roadAddress = data.roadAddress || data.jibunAddress;
+        let buildingInfo = "";
+
+        if (data.userSelectedType === "R" && data.bname && /[동|로|가]$/g.test(data.bname)) {
+          buildingInfo += data.bname;
+        }
+
+        if (data.userSelectedType === "R" && data.buildingName && data.apartment === "Y") {
+          buildingInfo += buildingInfo ? `, ${data.buildingName}` : data.buildingName;
+        }
+
+        if (buildingInfo) {
+          buildingInfo = ` (${buildingInfo})`;
+        }
+
+        const addressData = {
+          street: encodeURIComponent(`${roadAddress}${buildingInfo}`),
+          postalCode: data.zonecode,
+          type: data.userSelectedType.toLowerCase(),
+          divisionCode: data.sigunguCode.substr(0, 2)
+        };
+
+        if (location.search.includes("from=web")) {
+          getCoordinates(data.address)
+            .then(coordinateData => {
+              const mergedData = mergeObjects({}, addressData, coordinateData);
+              window.opener.postMessage(mergedData, document.referrer);
+            })
+            .catch(() => {
+              window.opener.postMessage(addressData, document.referrer);
+            });
+        } else {
+          window.location = `network.kasa.exchange://address?street=${addressData.street}&postalCode=${addressData.postalCode}&type=${addressData.type}`;
+        }
+      },
+      width: "100%",
+      height: "100%"
+    }).embed(document.getElementById("layer"), { autoClose: false });
+  </script>
+</body>
+</html>

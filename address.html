@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>카사 주소 검색</title>
+  <title>주소 검색</title>
 
   <!-- 다움 우편번호 검색 API -->
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
@@ -111,7 +111,7 @@
               window.opener.postMessage(addressData, document.referrer);
             });
         } else {
-          window.location = `network.kasa.exchange://address?street=${addressData.street}&postalCode=${addressData.postalCode}&type=${addressData.type}`;
+          window.location = `co.kr.estherformula.EstherPack://address?street=${addressData.street}&postalCode=${addressData.postalCode}&type=${addressData.type}`;
         }
       },
       width: "100%",

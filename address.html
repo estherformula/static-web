@@ -111,7 +111,7 @@
               window.opener.postMessage(addressData, document.referrer);
             });
         } else {
-          window.location = `co.kr.estherformula.EstherPack://address?street=${addressData.street}&postalCode=${addressData.postalCode}&type=${addressData.type}`;
+          window.location = `estherpack://address?street=${addressData.street}&postalCode=${addressData.postalCode}&type=${addressData.type}`;
         }
       },
       width: "100%",

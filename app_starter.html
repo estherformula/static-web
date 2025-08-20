@@ -263,8 +263,8 @@
     function processUrlParams() {
         const urlParams = new URLSearchParams(window.location.search);
 
-        // 예: ?product=5678 -> myapp://goods/5678
-        const goodsId = urlParams.get('product');
+        // 예: ?goodsId=5678 -> myapp://goods/5678
+        const goodsId = urlParams.get('goodsId');
         if (goodsId) {
             CONFIG.deepLink = `estherpack://goods?goodsId=${goodsId}`;
         }

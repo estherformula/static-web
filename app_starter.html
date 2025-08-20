@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>앱 다운로드</title>
-    
+    <title>앱으로 이동</title>
+
     <!-- Open Graph 메타 태그 (카톡, 페이스북 등 공유시 표시) -->
     <meta property="og:title" content="앱 이름">
-    <meta property="og:description" content="지금 앱을 다운로드하세요!">
+    <meta property="og:description" content="앱에서 확인하세요!">
     <meta property="og:image" content="https://your-domain.com/app-icon.png">
-    
+
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -21,17 +21,18 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        
+
         .container {
             text-align: center;
             padding: 20px;
+            max-width: 400px;
         }
-        
+
         .loading {
             font-size: 24px;
             margin-bottom: 20px;
         }
-        
+
         .spinner {
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
@@ -41,23 +42,23 @@
             animation: spin 1s linear infinite;
             margin: 20px auto;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
         .manual-links {
             margin-top: 30px;
             opacity: 0;
             animation: fadeIn 1s forwards;
             animation-delay: 2s;
         }
-        
+
         @keyframes fadeIn {
             to { opacity: 1; }
         }
-        
+
         .store-button {
             display: inline-block;
             margin: 10px;
@@ -68,142 +69,235 @@
             border-radius: 25px;
             font-weight: bold;
             transition: transform 0.2s;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
         }
-        
+
         .store-button:hover {
             transform: scale(1.05);
         }
-        
-        .error-message {
-            display: none;
-            color: #ff6b6b;
+
+        .debug-info {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
             margin-top: 20px;
+            font-size: 14px;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+        }
+
+        .test-notice {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .status {
+            font-size: 14px;
+            margin-top: 10px;
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="loading">앱 스토어로 이동 중...</div>
-        <div class="spinner"></div>
-        
-        <!-- 테스트 안내 메시지 -->
-        <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 10px; margin: 20px 0;">
-            <p>⚠️ 현재 자동 이동이 비활성화되어 있습니다</p>
-            <p style="font-size: 14px;">실제 사용시 94번째 줄 주석을 해제하세요</p>
-        </div>
-        
-        <!-- 자동 리다이렉트가 실패할 경우를 대비한 수동 링크 -->
-        <div class="manual-links">
-            <p>자동으로 이동되지 않나요?</p>
-            <button onclick="redirect()" class="store-button" style="background: #4CAF50; color: white; cursor: pointer;">
-                🚀 지금 리다이렉트 테스트
-            </button>
-            <br><br>
-            <p>또는 직접 선택:</p>
-            <a href="https://apps.apple.com/app/id6737678222" class="store-button" id="ios-link">
-                📱 App Store
-            </a>
-            <a href="https://play.google.com/store/apps/details?id=com.estherformula.estherpack.android" class="store-button" id="android-link">
-                🤖 Google Play
-            </a>
-        </div>
-        
-        <div class="error-message" id="error">
-            스토어로 이동할 수 없습니다. 위 버튼을 클릭해주세요.
-        </div>
+<div class="container">
+    <div class="loading">앱으로 이동 중...</div>
+    <div class="spinner"></div>
+    <div class="status" id="status">앱 실행을 시도하고 있습니다...</div>
+
+    <!-- 테스트 안내 메시지 -->
+<!--    <div class="test-notice">-->
+<!--        <p>⚠️ 현재 자동 실행이 비활성화되어 있습니다</p>-->
+<!--        <p style="font-size: 14px;">실제 사용시 138번째 줄 주석을 해제하세요</p>-->
+<!--    </div>-->
+
+    <!-- 수동 링크 -->
+    <div class="manual-links">
+        <p>수동 테스트:</p>
+        <button onclick="executeDeepLink()" class="store-button" style="background: #4CAF50; color: white;">
+            🚀 딥링크 실행 테스트
+        </button>
+        <br><br>
+        <p>또는 스토어로 직접 이동:</p>
+        <a href="#" onclick="goToStore(); return false;" class="store-button" id="store-link">
+            🏪 앱 스토어로 이동
+        </a>
     </div>
 
-    <script>
-        // ⚠️ 아래 URL들을 실제 앱 스토어 URL로 변경하세요!
-        const APP_STORES = {
+    <!-- 디버그 정보 -->
+    <div class="debug-info" id="debug-info"></div>
+</div>
+
+<script>
+    // ⚠️ 아래 설정을 실제 앱 정보로 변경하세요!
+    const CONFIG = {
+        // 딥링크 설정
+        deepLink: 'estherpack://goods/3',  // 앱 Custom Scheme URL
+
+        // 앱 스토어 URL
+        appStores: {
             ios: 'https://apps.apple.com/app/id6737678222',  // iOS 앱 스토어 URL
             android: 'https://play.google.com/store/apps/details?id=com.estherformula.estherpack.android',  // 안드로이드 플레이스토어 URL
-            fallback: 'https://your-website.com'  // 둘 다 아닐 경우 (데스크톱 등) 이동할 URL
-        };
+            fallback: 'https://esthermall.co.kr'  // 둘 다 아닐 경우 (데스크톱 등) 이동할 URL
+        },
 
-        // 앱 스토어 URL 업데이트 (수동 링크용)
-        document.getElementById('ios-link').href = APP_STORES.ios;
-        document.getElementById('android-link').href = APP_STORES.android;
+        // 타이밍 설정 (밀리초)
+        waitTime: 2500,  // 앱 실행 대기 시간 (2.5초)
+        delayBeforeExecute: 100  // 페이지 로드 후 실행 대기 시간
+    };
 
-        function detectOS() {
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            
-            // iOS 감지
-            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-                return 'ios';
-            }
-            
-            // Android 감지
-            if (/android/i.test(userAgent)) {
-                return 'android';
-            }
-            
-            // 그 외 (데스크톱 등)
-            return 'other';
+    // ==========================================
+    // 🔴 자동 실행 코드 - 실제 사용시 아래 주석을 해제하세요!
+    // ==========================================
+
+    setTimeout(executeDeepLink, CONFIG.delayBeforeExecute);  // 👈 이 줄의 주석(//)을 제거하면 자동 실행됩니다
+
+    // ==========================================
+    // 🔴 자동 실행 코드 끝
+    // ==========================================
+
+    // OS 감지
+    function detectOS() {
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            return 'ios';
         }
 
-        function redirect() {
-            const os = detectOS();
-            let targetUrl;
-            
-            switch(os) {
-                case 'ios':
-                    targetUrl = APP_STORES.ios;
-                    break;
-                case 'android':
-                    targetUrl = APP_STORES.android;
-                    break;
-                default:
-                    targetUrl = APP_STORES.fallback;
-            }
-            
-            // 리다이렉트 시도
-            try {
-                window.location.replace(targetUrl);
-            } catch (e) {
-                // 에러 발생시 에러 메시지 표시
-                document.getElementById('error').style.display = 'block';
-            }
+        if (/android/i.test(userAgent)) {
+            return 'android';
         }
 
-        // 페이지 로드 후 약간의 딜레이를 두고 리다이렉트
-        // (사용자가 로딩 화면을 볼 수 있도록)
-        // ⚠️ 테스트를 위해 자동 이동 비활성화 - 실제 사용시 주석 해제하세요!
-        // setTimeout(redirect, 1000);
+        return 'other';
+    }
 
-        // URL 파라미터 처리 (선택사항)
-        // 예: redirect.html?campaign=summer2024
+    // 앱 스토어로 이동
+    function goToStore() {
+        const os = detectOS();
+        let storeUrl;
+
+        switch(os) {
+            case 'ios':
+                storeUrl = CONFIG.appStores.ios;
+                break;
+            case 'android':
+                storeUrl = CONFIG.appStores.android;
+                break;
+            default:
+                storeUrl = CONFIG.appStores.fallback;
+        }
+
+        updateStatus('앱 스토어로 이동합니다...');
+        window.location.href = storeUrl;
+    }
+
+    // 딥링크 실행 (앱 실행 시도)
+    function executeDeepLink() {
+        const startTime = Date.now();
+
+        updateStatus('앱 실행을 시도합니다...');
+
+        // 딥링크 실행 시도
+        // iframe 방식 (iOS/Android 모두 지원)
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = CONFIG.deepLink;
+        document.body.appendChild(iframe);
+
+        // 대체 방법: location.href (일부 환경에서 더 잘 작동)
+        setTimeout(() => {
+            window.location.href = CONFIG.deepLink;
+        }, 100);
+
+        // 앱이 실행되지 않았는지 확인
+        let appOpened = false;
+        const checkInterval = setInterval(() => {
+            if (document.hidden || document.webkitHidden) {
+                // 페이지가 백그라운드로 갔다면 앱이 실행된 것
+                appOpened = true;
+                clearInterval(checkInterval);
+                clearTimeout(fallbackTimeout);
+                updateStatus('앱이 실행되었습니다!');
+            }
+        }, 200);
+
+        // 일정 시간 후에도 앱이 열리지 않으면 스토어로 이동
+        const fallbackTimeout = setTimeout(() => {
+            clearInterval(checkInterval);
+            if (!appOpened && !document.hidden) {
+                updateStatus('앱이 설치되지 않았습니다. 스토어로 이동합니다...');
+                setTimeout(goToStore, 500);
+            }
+        }, CONFIG.waitTime);
+
+        // 페이지 포커스 이벤트 감지 (더 정확한 감지)
+        window.addEventListener('blur', () => {
+            appOpened = true;
+            clearInterval(checkInterval);
+            clearTimeout(fallbackTimeout);
+        });
+
+        // iOS Safari의 경우 추가 감지
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                appOpened = true;
+                clearInterval(checkInterval);
+                clearTimeout(fallbackTimeout);
+            }
+        });
+    }
+
+    // 상태 메시지 업데이트
+    function updateStatus(message) {
+        const statusEl = document.getElementById('status');
+        if (statusEl) {
+            statusEl.textContent = message;
+        }
+        console.log(message);
+    }
+
+    // URL 파라미터 처리 (동적 딥링크용)
+    function processUrlParams() {
         const urlParams = new URLSearchParams(window.location.search);
+
+        // 예: ?product=5678 -> myapp://goods/5678
+        const goodsId = urlParams.get('product');
+        if (goodsId) {
+            CONFIG.deepLink = `estherpack://goods?goodsId=${goodsId}`;
+        }
+
+        // 캠페인 파라미터 처리
         const campaign = urlParams.get('campaign');
-        
         if (campaign) {
-            // 캠페인 파라미터가 있으면 스토어 URL에 추가
-            // 이를 통해 어떤 캠페인에서 유입됐는지 추적 가능
-            const separator = APP_STORES.ios.includes('?') ? '&' : '?';
-            APP_STORES.ios += `${separator}ct=${campaign}`;
-            APP_STORES.android += `&referrer=utm_source%3D${campaign}`;
+            // 딥링크에 캠페인 정보 추가
+            CONFIG.deepLink += `?campaign=${campaign}`;
         }
-        
-        // 디버그 모드 (개발시 유용)
-        const debug = urlParams.get('debug');
-        // 테스트를 위해 항상 디버그 정보 표시 (실제 사용시 이 부분 삭제)
-        if (debug === 'true' || true) {
-            console.log('Detected OS:', detectOS());
-            console.log('User Agent:', navigator.userAgent);
-            console.log('Redirect URLs:', APP_STORES);
-            
-            // 화면에도 디버그 정보 표시
-            const debugInfo = document.createElement('div');
-            debugInfo.style.cssText = 'background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-top: 20px; font-size: 14px; text-align: left;';
-            debugInfo.innerHTML = `
-                <strong>디버그 정보:</strong><br>
-                OS: ${detectOS()}<br>
-                User Agent: ${navigator.userAgent.substring(0, 100)}...<br>
-                iOS URL: ${APP_STORES.ios}<br>
-                Android URL: ${APP_STORES.android}
+    }
+
+    // 디버그 정보 표시
+    function showDebugInfo() {
+        const debugEl = document.getElementById('debug-info');
+        const os = detectOS();
+
+        debugEl.innerHTML = `
+                <strong>🔍 디버그 정보:</strong><br>
+                <strong>OS:</strong> ${os}<br>
+                <strong>User Agent:</strong> ${navigator.userAgent.substring(0, 80)}...<br>
+                <strong>딥링크:</strong> ${CONFIG.deepLink}<br>
+                <strong>iOS 스토어:</strong> ${CONFIG.appStores.ios}<br>
+                <strong>Android 스토어:</strong> ${CONFIG.appStores.android}<br>
+                <strong>대기 시간:</strong> ${CONFIG.waitTime}ms
             `;
-            document.querySelector('.container').appendChild(debugInfo);
-        }
-    </script>
+    }
+
+    // 초기화
+    window.addEventListener('DOMContentLoaded', () => {
+        processUrlParams();
+        showDebugInfo();
+    });
+</script>
 </body>
 </html>

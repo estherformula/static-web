@@ -263,7 +263,7 @@
 
     // URL 파라미터 처리 (동적 딥링크용)
     function processUrlParams() {
-        const urlParams = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(window.location.search);
 
         const couponCode = params.get('coupon');
         if (couponCode) {

@@ -263,18 +263,23 @@
     function processUrlParams() {
         const urlParams = new URLSearchParams(window.location.search);
 
-        // 예: ?goodsId=5678 -> myapp://goods/5678
-        const goodsId = urlParams.get('goodsId');
-        if (goodsId) {
-            CONFIG.deepLink = `estherpack://store/goods?goodsId=${goodsId}`;
+        const deeplinkParam = params.get('deeplink');
+        if (deeplinkParam) {
+            CONFIG.deepLink = decodeURIComponent(deeplinkParam);
         }
 
-        // 캠페인 파라미터 처리
-        const campaign = urlParams.get('campaign');
-        if (campaign) {
-            // 딥링크에 캠페인 정보 추가
-            CONFIG.deepLink += `?campaign=${campaign}`;
-        }
+        // // 예: ?goodsId=5678 -> myapp://goods/5678
+        // const goodsId = urlParams.get('goodsId');
+        // if (goodsId) {
+        //     CONFIG.deepLink = `estherpack://store/goods?goodsId=${goodsId}`;
+        // }
+
+        // // 캠페인 파라미터 처리
+        // const campaign = urlParams.get('campaign');
+        // if (campaign) {
+        //     // 딥링크에 캠페인 정보 추가
+        //     CONFIG.deepLink += `?campaign=${campaign}`;
+        // }
     }
 
     // 디버그 정보 표시

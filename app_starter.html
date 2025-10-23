@@ -1,3 +1,5 @@
+<!-- https://estherformula.github.io/static-web/app_starter.html?deeplink=estherpack://store -->
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -118,7 +120,7 @@
     <div class="manual-links">
         <p>수동 테스트:</p>
         <button onclick="executeDeepLink()" class="store-button" style="background: #4CAF50; color: white;">
-            🚀 딥링크 실행 테스트
+            🚀 앱 실행하기
         </button>
         <br><br>
         <p>또는 스토어로 직접 이동:</p>
@@ -135,7 +137,7 @@
     // ⚠️ 아래 설정을 실제 앱 정보로 변경하세요!
     const CONFIG = {
         // 딥링크 설정
-        deepLink: 'estherpack://my/setting',  // 앱 Custom Scheme URL
+        deepLink: 'estherpack://',  // 앱 Custom Scheme URL
 
         // 앱 스토어 URL
         appStores: {
@@ -263,23 +265,26 @@
     function processUrlParams() {
         const urlParams = new URLSearchParams(window.location.search);
 
-        const deeplinkParam = params.get('deeplink');
+        const deeplinkParam = params.get('coupon');
         if (deeplinkParam) {
-            CONFIG.deepLink = decodeURIComponent(deeplinkParam);
+            CONFIG.deepLink = `estherpack://my/myCoupon?couponCode=${deeplinkParam}`;
+            return
         }
 
-        // // 예: ?goodsId=5678 -> myapp://goods/5678
-        // const goodsId = urlParams.get('goodsId');
-        // if (goodsId) {
-        //     CONFIG.deepLink = `estherpack://store/goods?goodsId=${goodsId}`;
-        // }
+        // 예: ?goodsId=5678 -> myapp://goods/5678
+        const goodsId = urlParams.get('goodsId');
+        if (goodsId) {
+            CONFIG.deepLink = `estherpack://store/goods?goodsId=${goodsId}`;
+            return
+        }
 
-        // // 캠페인 파라미터 처리
-        // const campaign = urlParams.get('campaign');
-        // if (campaign) {
-        //     // 딥링크에 캠페인 정보 추가
-        //     CONFIG.deepLink += `?campaign=${campaign}`;
-        // }
+        // 캠페인 파라미터 처리
+        const campaign = urlParams.get('campaign');
+        if (campaign) {
+            // 딥링크에 캠페인 정보 추가
+            CONFIG.deepLink += `?campaign=${campaign}`;
+            return
+        }
     }
 
     // 디버그 정보 표시

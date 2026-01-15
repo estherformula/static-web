@@ -18,8 +18,9 @@
           "Helvetica Neue", Arial, sans-serif;
         display: flex;
         justify-content: center;
-        align-items: center;
-        height: 100vh;
+
+        min-height: 100svh;
+        min-height: 100dvh;
         margin: 0;
         /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
         color: #000;
@@ -27,14 +28,34 @@
 
       .container {
         display: flex;
-        align-items: center;
         justify-content: center;
         width: 100vw;
-        height: 100vh;
+        min-height: 100svh;
+        min-height: 100dvh;
+        height: auto;
         overflow: hidden;
         text-align: center;
         padding: 0 16px 0;
         /* max-width: 400px; */
+      }
+
+      .manual-links {
+        /* margin-top: 30px; */
+        width: 100%;
+        max-width: 400px;
+
+        flex: 1;
+        overflow: hidden;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        /* 대기 애니메이션 주석 */
+
+        /* opacity: 0;
+            animation: fadeIn 1s forwards;
+            animation-delay: 2s; */
       }
 
       .loading {
@@ -61,27 +82,11 @@
         }
       }
 
-      .manual-links {
-        /* margin-top: 30px; */
-        width: 100%;
-        max-width: 400px;
-        height: 100%;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
-        /* 대기 애니메이션 주석 */
-
-        /* opacity: 0;
-        animation: fadeIn 1s forwards;
-        animation-delay: 2s; */
-      }
-
       .logo {
         display: flex;
-        height: calc(100% - 76px);
+        flex: 1;
         align-items: center;
+        justify-content: center;
       }
 
       @keyframes fadeIn {
@@ -91,7 +96,7 @@
       }
 
       .store-button {
-        margin-bottom: 20px;
+        margin-bottom: calc(20px + env(safe-area-inset-bottom));
         width: 100%;
         display: flex;
         align-items: center;
@@ -110,15 +115,15 @@
       }
 
       /* .store-button:hover {
-        transform: scale(1.05);
-      } */
+            transform: scale(1.05);
+          } */
 
       .debug-info {
         background: rgba(0, 0, 0, 0.3);
         /* padding: 15px;
-        border-radius: 10px; */
+            border-radius: 10px; */
         /* margin-top: 20px;
-        font-size: 14px; */
+            font-size: 14px; */
         text-align: left;
         font-family: "Courier New", monospace;
         height: 0px;

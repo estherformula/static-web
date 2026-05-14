@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>딥링크 테스트</title>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            background-color: #f8f8f8;
+            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+            color: #222;
+        }
+
+        .container {
+            padding: 24px 20px;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            margin: 0 0 8px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: #888;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .btn-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px 18px;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #222;
+            transition: background-color 0.15s ease;
+        }
+
+        .btn:active {
+            background-color: #f0f0f0;
+        }
+
+        .btn-title {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 6px;
+        }
+
+        .btn-url {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>딥링크 테스트</h1>
+            <p>버튼을 누르면 앱 딥링크로 이동합니다.</p>
+        </div>
+
+        <div class="btn-list">
+            <a class="btn" href="estherpack://my/setting">
+                <span class="btn-title">설정화면으로 이동</span>
+                <span class="btn-url">estherpack://my/setting</span>
+            </a>
+
+            <a class="btn" href="estherpack://subscribe/">
+                <span class="btn-title">구독리스트 화면으로 이동</span>
+                <span class="btn-url">estherpack://subscribe/</span>
+            </a>
+
+            <a class="btn" href="estherpack://my/">
+                <span class="btn-title">마이페이지로 이동</span>
+                <span class="btn-url">estherpack://my/</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>마일리지 안내</title>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: #ffffff; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+    .container img {
+      display: block;
+      width: 100%;
+      height: auto;
+      vertical-align: top;
+      border: 0;
+    }
+
+    .btn {
+      position: absolute;
+      display: block;
+      text-indent: -9999px;
+      overflow: hidden;
+      background: transparent;
+      cursor: pointer;
+    }
+    .btn1 { top: 20.472%; left: 4.267%; width: 91.333%; height: 1.802%; }
+    .btn2 { top: 39.699%; left: 6.667%; width: 86.667%; height: 1.638%; }
+    .btn3 { top: 57.583%; left: 6.667%; width: 86.667%; height: 1.638%; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="img_01.jpg" alt="에스더팩 적립금 혜택 안내" fetchpriority="high" decoding="async" />
+    <img src="img_02.jpg" alt="" loading="lazy" decoding="async" />
+    <img src="img_03.jpg" alt="" loading="lazy" decoding="async" />
+    <img src="img_04.jpg" alt="" loading="lazy" decoding="async" />
+    <img src="img_05.jpg" alt="" loading="lazy" decoding="async" />
+    <img src="img_06.jpg" alt="" loading="lazy" decoding="async" />
+
+    <a class="btn btn1" href="estherpack://my/setting" aria-label="적립금 1,000원 받으러 가기">적립금 1,000원 받으러 가기</a>
+    <a class="btn btn2" href="estherpack://orders" aria-label="내 구독 확인하러 가기">내 구독 확인하러 가기</a>
+    <a class="btn btn3" href="estherpack://my/writableReviews" aria-label="리뷰 쓰러 가기">리뷰 쓰러 가기</a>
+  </div>
+</body>
+</html>

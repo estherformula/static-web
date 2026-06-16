@@ -97,11 +97,13 @@ def build_html(groups):
     for idx, it in enumerate(items_flat):
         detail_parts.append(
             f'      <article class="faq-detail" id="detail-{idx}" hidden>\n'
-            f'        <button class="back" onclick="showList()" aria-label="뒤로">\n'
-            f'          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+            f'        <div class="detail-header">\n'
+            f'          <button class="back" onclick="showList()" aria-label="뒤로">\n'
+            f'            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
             f'<path d="M15 19L8 12L15 5" stroke="#1F2A37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>\n'
-            f'        </button>\n'
-            f'        <span class="badge">{html.escape(it["group"])}</span>\n'
+            f'          </button>\n'
+            f'          <span class="badge">{html.escape(it["group"])}</span>\n'
+            f'        </div>\n'
             f'        <h1 class="detail-title">{html.escape(it["q"])}</h1>\n'
             f'        <div class="detail-content">{render_answer(it["a"])}</div>\n'
             f'      </article>'
@@ -183,13 +185,20 @@ TEMPLATE = """<!DOCTYPE html>
 
     /* 상세(2뎁스) */
     .faq-detail {{ padding: 0 16px 60px; }}
+    .detail-header {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }}
     .back {{
+      flex: 0 0 auto;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       width: 40px;
       height: 40px;
-      margin: 8px -8px 0;
+      margin-left: -8px;
       padding: 0;
       background: none;
       border: 0;
@@ -197,7 +206,6 @@ TEMPLATE = """<!DOCTYPE html>
     }}
     .badge {{
       display: inline-block;
-      margin-top: 16px;
       padding: 3px 6px;
       border-radius: 6px;
       background: var(--gray100);
@@ -207,7 +215,7 @@ TEMPLATE = """<!DOCTYPE html>
       line-height: 1.4;
     }}
     .detail-title {{
-      margin: 12px 0 0;
+      margin: 16px 0 0;
       font-size: 20px;
       font-weight: 600;
       line-height: 1.4;

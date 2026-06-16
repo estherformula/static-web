@@ -204,6 +204,7 @@ TEMPLATE = """<!DOCTYPE html>
       border: 0;
       cursor: pointer;
     }}
+    .hide-detail-back .back {{ display: none; }}
     .badge {{
       display: inline-block;
       padding: 3px 6px;
@@ -243,6 +244,10 @@ TEMPLATE = """<!DOCTYPE html>
   <script>
     var listEl = document.getElementById('list');
     var currentDetail = null;
+
+    if (new URLSearchParams(location.search).get('hideDetailBack') === 'true') {{
+      document.documentElement.classList.add('hide-detail-back');
+    }}
 
     function showDetail(idx) {{
       var el = document.getElementById('detail-' + idx);

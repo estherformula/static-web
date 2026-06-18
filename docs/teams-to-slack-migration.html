@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teams → Slack 마이그레이션 검토 보고서</title>
+<style>
+  :root{
+    --ink:#1f2430; --sub:#5b6472; --line:#e6e8ee; --bg:#f6f7f9;
+    --card:#ffffff; --accent:#4a154b; --slack:#36c5f0; --teams:#5059c9;
+    --red:#d6453d; --redbg:#fdeceb; --amber:#b9770e; --amberbg:#fdf3e2;
+    --green:#2f8a4e; --greenbg:#e9f6ee; --gray:#8a93a2;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Segoe UI",Roboto,sans-serif;
+    line-height:1.7; font-size:16px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px; margin:0 auto; padding:32px 20px 80px;}
+  header.top{
+    background:linear-gradient(135deg,var(--teams),var(--accent));
+    color:#fff; border-radius:18px; padding:34px 30px; margin-bottom:28px;
+    box-shadow:0 8px 28px rgba(80,89,201,.25);
+  }
+  header.top .flow{font-size:14px; opacity:.9; letter-spacing:.5px; margin-bottom:10px;}
+  header.top h1{margin:0 0 14px; font-size:27px; line-height:1.35;}
+  header.top .meta{font-size:13.5px; opacity:.92; line-height:1.6;}
+  header.top .meta b{font-weight:600;}
+
+  .tldr{
+    background:var(--card); border-radius:16px; padding:24px 26px; margin-bottom:26px;
+    border:1px solid var(--line); box-shadow:0 2px 10px rgba(20,25,40,.04);
+    border-left:6px solid var(--accent);
+  }
+  .tldr .label{
+    display:inline-block; font-size:12px; font-weight:700; letter-spacing:.8px;
+    color:var(--accent); background:#f3e9f3; padding:4px 12px; border-radius:20px; margin-bottom:12px;
+  }
+  .tldr p{margin:8px 0; font-size:16.5px;}
+  .tldr p.head{font-weight:700; font-size:18px; line-height:1.55;}
+
+  section{
+    background:var(--card); border-radius:16px; padding:26px 28px; margin-bottom:22px;
+    border:1px solid var(--line); box-shadow:0 2px 10px rgba(20,25,40,.04);
+  }
+  h2{
+    font-size:20px; margin:0 0 18px; padding-bottom:12px; border-bottom:2px solid var(--line);
+    display:flex; align-items:center; gap:10px;
+  }
+  h2 .num{
+    font-size:13px; font-weight:700; color:#fff; background:var(--accent);
+    width:26px; height:26px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center;
+    flex:none;
+  }
+  h3{font-size:16.5px; margin:22px 0 10px; color:var(--ink);}
+
+  .plain{
+    background:#f0f4ff; border-left:4px solid var(--teams); border-radius:8px;
+    padding:12px 16px; margin:14px 0; font-size:14.5px; color:#34406b;
+  }
+  .plain b{color:var(--teams);}
+
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:14.5px;}
+  th,td{text-align:left; padding:11px 13px; border-bottom:1px solid var(--line); vertical-align:top;}
+  th{background:#f4f5f8; font-weight:600; color:var(--sub); font-size:13px;}
+  tr:last-child td{border-bottom:none;}
+  td.center,th.center{text-align:center;}
+
+  .yes{color:var(--green); font-weight:700;}
+  .partial{color:var(--amber); font-weight:700;}
+  .no{color:var(--red); font-weight:700;}
+
+  .pill{display:inline-block; font-size:12px; font-weight:700; padding:3px 9px; border-radius:6px; white-space:nowrap;}
+  .pill.y{background:var(--greenbg); color:var(--green);}
+  .pill.p{background:var(--amberbg); color:var(--amber);}
+  .pill.n{background:var(--redbg); color:var(--red);}
+
+  .block{border-radius:12px; padding:16px 18px; margin:14px 0;}
+  .block.red{background:var(--redbg); border:1px solid #f3c9c5;}
+  .block.amber{background:var(--amberbg); border:1px solid #f0dcb4;}
+  .block.green{background:var(--greenbg); border:1px solid #c4e5cf;}
+  .block h4{margin:0 0 6px; font-size:15.5px; display:flex; gap:8px; align-items:baseline;}
+  .block.red h4{color:var(--red);}
+  .block.amber h4{color:var(--amber);}
+  .block.green h4{color:var(--green);}
+  .block .tag{font-size:11px; font-weight:800; padding:2px 8px; border-radius:5px; flex:none;}
+  .block.red .tag{background:var(--red); color:#fff;}
+  .block.amber .tag{background:var(--amber); color:#fff;}
+  .block p{margin:6px 0 0; font-size:14.5px;}
+
+  .platform-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:8px;}
+  @media(max-width:640px){.platform-grid{grid-template-columns:1fr;}}
+  .pcard{border-radius:12px; padding:18px; border:1px solid var(--line);}
+  .pcard.teams{background:#eef0fb; border-color:#d6daf6;}
+  .pcard.slack{background:#e7f7fd; border-color:#c3ebf8;}
+  .pcard .ptitle{font-weight:700; font-size:15px; margin-bottom:8px;}
+  .pcard.teams .ptitle{color:var(--teams);}
+  .pcard.slack .ptitle{color:#1a91bf;}
+  .pcard ul{margin:6px 0 0; padding-left:18px; font-size:14px;}
+  .pcard li{margin:5px 0;}
+
+  ul.clean{padding-left:20px;}
+  ul.clean li{margin:7px 0;}
+
+  .rec{counter-reset:rec;}
+  .rec .step{display:flex; gap:14px; padding:14px 0; border-bottom:1px dashed var(--line);}
+  .rec .step:last-child{border-bottom:none;}
+  .rec .step .n{
+    flex:none; width:30px; height:30px; border-radius:50%; background:var(--green); color:#fff;
+    font-weight:700; display:flex; align-items:center; justify-content:center; font-size:14px;
+  }
+  .rec .step.cond .n{background:var(--amber);}
+  .rec .step.common .n{background:var(--gray);}
+  .rec .step .body b{font-size:15px;}
+  .rec .step .body p{margin:5px 0 0; font-size:14px; color:var(--sub);}
+
+  .open-item{display:flex; gap:12px; padding:11px 0; border-bottom:1px solid var(--line); font-size:14.5px;}
+  .open-item:last-child{border-bottom:none;}
+  .open-item .id{font-weight:700; color:var(--accent); flex:none; width:38px;}
+  .open-item .who{flex:none; font-size:12px; color:var(--gray); align-self:center; margin-left:auto; background:#f1f2f6; padding:3px 10px; border-radius:14px; white-space:nowrap;}
+
+  .legend{font-size:13px; color:var(--gray); margin-top:8px;}
+
+  .sources a{color:var(--teams); text-decoration:none; word-break:break-all; font-size:13.5px;}
+  .sources a:hover{text-decoration:underline;}
+  .sources li{margin:7px 0;}
+  .sources .group{font-weight:700; font-size:13.5px; color:var(--sub); margin:14px 0 4px;}
+
+  footer{text-align:center; color:var(--gray); font-size:13px; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="flow">Microsoft Teams 채팅　→　Slack</div>
+    <h1>사내 협업도구 전환 검토 보고서</h1>
+    <div class="meta">
+      <b>검토자</b> 지나 (검증형 기획자 관점)　·　<b>작성일</b> 2026-06-18<br>
+      <b>대상</b> 사내 채팅 도구를 Microsoft Teams → Slack 으로 전환하는 IT/운영 건<br>
+      <b>방식</b> 양 플랫폼 공식 문서 조사 + 리스크 분석
+    </div>
+  </header>
+
+  <!-- 한 줄 결론 -->
+  <div class="tldr">
+    <span class="label">한 줄 결론</span>
+    <p class="head">과거 대화를 그대로(빠짐없이) 옮기는 "공식 정품 경로"는 없습니다.</p>
+    <p>전환 자체는 가능합니다. 다만 채팅 기록·파일·답글·이모지까지 100% 보존하려면 외부 유료 업체에 전적으로 의존해야 하고, 그마저도 <b>우리가 가려는 방향(Teams→Slack)이 시장에서 흔치 않은 방향</b>이라 검증이 먼저 필요합니다.</p>
+    <p>현실적 권고는 <b>"슬랙에서 새로 시작 + 과거 기록은 Teams에 읽기전용으로 보관"</b> 입니다.</p>
+  </div>
+
+  <!-- 1. 의사결정자용 요약 -->
+  <section>
+    <h2><span class="num">1</span>한눈에 보는 요약</h2>
+    <table>
+      <tr><th>항목</th><th>결론</th></tr>
+      <tr><td>Slack 새 업무공간 구축</td><td><span class="pill y">문제 없음</span> 표준 작업</td></tr>
+      <tr><td>채널 + 채널 메시지 + 사용자 기본 이관</td><td><span class="pill p">부분 가능</span> 공식 파일 업로드 방식 (정보 손실 큼)</td></tr>
+      <tr><td>1:1 / 그룹 개인 대화(DM) 이관</td><td><span class="pill n">공식 경로 없음</span> 외부 업체 필요</td></tr>
+      <tr><td>파일·답글·이모지·멘션 보존</td><td><span class="pill n">공식 미지원</span> 외부 업체 의존</td></tr>
+      <tr><td>Teams에서 데이터 빼내기</td><td><span class="pill p">가능</span> 단 라이선스·권한 요건 있음</td></tr>
+      <tr><td>가장 큰 리스크</td><td>시장 도구 대부분이 반대 방향(Slack→Teams)에 맞춰져 있음</td></tr>
+      <tr><td><b>최종 권고</b></td><td><b>새로 시작 + 과거는 Teams 보관.</b> 전체 이관은 비용·리스크 대비 효용 낮음</td></tr>
+    </table>
+  </section>
+
+  <!-- 2. 양 플랫폼 지원 방식 -->
+  <section>
+    <h2><span class="num">2</span>두 플랫폼은 각각 무엇을 지원하나</h2>
+
+    <div class="plain">
+      <b>쉽게 말하면</b> — Teams는 "데이터를 밖으로 꺼내주는 것"까지만 합니다. Slack은 "정해진 형식의 파일만 받아주는 것"까지만 합니다. 문제는 <b>Teams가 꺼내주는 형식과 Slack이 받아주는 형식이 서로 맞지 않는다</b>는 데 있습니다.
+    </div>
+
+    <div class="platform-grid">
+      <div class="pcard teams">
+        <div class="ptitle">▸ Teams 측 — 데이터 꺼내기</div>
+        <ul>
+          <li><b>방법 A. eDiscovery</b><br>채팅·채널 메시지를 참가자·시간 포함해 추출. 원래 법무·감사용. 상위 라이선스(E5급) 필요. 결과물은 <b>Slack이 바로 못 읽는 형식.</b></li>
+          <li><b>방법 B. Graph Export API</b><br>개발 방식으로 메시지를 자동 추출. 관리자 승인·기술 인력 필요. <b>2025-08-25부로 메시지당 과금은 폐지</b>됐으나 승인 절차는 남음.</li>
+        </ul>
+      </div>
+      <div class="pcard slack">
+        <div class="ptitle">▸ Slack 측 — 데이터 받기</div>
+        <ul>
+          <li>공식으로 받아주는 소스는 딱 둘:<br>① 다른 <b>Slack</b> 업무공간　② <b>CSV/텍스트 파일</b></li>
+          <li><b>Teams를 직접 받아오는 경로는 없음</b> (공식 문서 확인됨)</li>
+          <li>CSV로 받을 수 있는 건 <b>채널·메시지 본문·사용자 계정뿐.</b> 개인대화·파일·답글·이모지·비공개 채널·프로필은 <b>전부 못 받음.</b></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 실제 이관 경로 -->
+  <section>
+    <h2><span class="num">3</span>실제로 무엇이 옮겨지고, 무엇이 안 옮겨지나</h2>
+
+    <table>
+      <tr>
+        <th>데이터 종류</th>
+        <th class="center">Slack 공식 방식</th>
+        <th class="center">외부 업체 이용 시</th>
+      </tr>
+      <tr><td>공개 채널 (구조)</td><td class="center partial">△</td><td class="center yes">○</td></tr>
+      <tr><td>비공개 채널</td><td class="center no">✕</td><td class="center partial">△</td></tr>
+      <tr><td>채널 메시지 (본문)</td><td class="center partial">△ 평문만</td><td class="center yes">○</td></tr>
+      <tr><td>1:1 개인 대화 (DM)</td><td class="center no">✕</td><td class="center partial">△ 방향 확인 필요</td></tr>
+      <tr><td>그룹 개인 대화</td><td class="center no">✕</td><td class="center partial">△</td></tr>
+      <tr><td>파일·첨부</td><td class="center no">✕</td><td class="center yes">○</td></tr>
+      <tr><td>답글 (스레드)</td><td class="center no">✕</td><td class="center yes">○</td></tr>
+      <tr><td>이모지·리액션</td><td class="center no">✕</td><td class="center yes">○</td></tr>
+      <tr><td>@멘션</td><td class="center no">✕</td><td class="center yes">○</td></tr>
+      <tr><td>멤버·권한</td><td class="center partial">△ 계정만</td><td class="center partial">△</td></tr>
+      <tr><td>작성 시간</td><td class="center yes">○</td><td class="center yes">○</td></tr>
+    </table>
+    <p class="legend">○ 가능　·　△ 부분·조건부　·　✕ 불가</p>
+
+    <h3>외부 마이그레이션 업체에 대한 결정적 주의</h3>
+    <div class="plain">
+      시장에는 CloudFuze·Cloudiway·ShareGate·AvePoint 같은 전문 업체가 있습니다. 그러나 이들은 대부분 <b>"Slack에서 Teams로" 옮기는 방향</b>에 최적화돼 있습니다. 우리는 <b>정반대 방향</b>입니다.
+    </div>
+    <ul class="clean">
+      <li><b>Cloudiway</b> — 공식 페이지상 출발지로 <b>Slack만</b> 지원. Teams→Slack은 <b>미지원으로 확인됨.</b></li>
+      <li><b>CloudFuze</b> — 양방향을 시사하는 문구는 있으나 Teams→Slack을 <b>명시 보증하는 공식 페이지는 확인 안 됨</b> → 확인 필요 항목.</li>
+      <li>업체가 기술적으로 처리할 수는 있어도, <b>검증된 사례·문서가 빈약</b>하므로 계약 전 시범 이관(PoC)으로 반드시 검증해야 합니다.</li>
+    </ul>
+  </section>
+
+  <!-- 4. 리스크/블로커 -->
+  <section>
+    <h2><span class="num">4</span>리스크 — 먼저 풀어야 할 것 vs 관리하면 되는 것</h2>
+
+    <div class="block red">
+      <h4><span class="tag">블로커</span> 1. 방향성 미검증 (최우선)</h4>
+      <p>Teams→Slack은 시장 도구의 역방향입니다. Cloudiway는 명시적 미지원, CloudFuze 등은 공식 보증 미확인. "전체 기록 자동 이관"을 목표로 확정하려면 <b>그 전에 업체 시범 이관으로 방향 지원·보존율을 실측</b>해야 합니다. 이 검증 없이는 일정·예산 확정 불가.</p>
+    </div>
+    <div class="block red">
+      <h4><span class="tag">블로커</span> 2. 무손실 공식 경로 없음</h4>
+      <p>Slack 공식 방식만으로는 개인대화·파일·답글·이모지가 <b>전부 사라집니다.</b> "과거 대화를 Slack 안에서 그대로 본다"가 필수라면 외부 업체 비용·종속이 전제가 됩니다.</p>
+    </div>
+
+    <div class="block amber">
+      <h4><span class="tag">우려</span> 데이터 정합성</h4>
+      <p>CSV 방식은 채널·작성자가 함께 옮겨지지 않은 메시지는 누락됩니다. 부분 이관 시 대화 맥락이 깨질 수 있어 이관 후 검수가 필수입니다.</p>
+    </div>
+    <div class="block amber">
+      <h4><span class="tag">우려</span> 개인 대화의 사생활·법적 이슈</h4>
+      <p>1:1 DM은 개인 대화입니다. 일괄 이관은 개인정보 접근 권한을 동반하므로 <b>한국 개인정보보호법·노무 관점에서 법무/인사 사전 합의</b>가 필요합니다.</p>
+    </div>
+    <div class="block amber">
+      <h4><span class="tag">우려</span> 라이선스·비용</h4>
+      <p>Teams 추출 API 과금은 폐지됐지만, ① 승인 절차 ② eDiscovery용 E5급 라이선스 보유 여부 ③ 외부 업체 비용(보통 사용자/메시지 단위)이 남습니다.</p>
+    </div>
+    <div class="block amber">
+      <h4><span class="tag">우려</span> 구조 차이 · 멤버 매핑</h4>
+      <p>Teams는 "팀&gt;채널" 2단 구조, Slack은 평면 구조라 매핑 규칙 설계가 필요합니다. 이메일 기준 사용자 매칭이라 퇴사자·외부 게스트·봇 계정은 누락 위험이 있습니다.</p>
+    </div>
+    <div class="block amber">
+      <h4><span class="tag">우려</span> 봇·연동·커스텀 이모지 · 병행 운영</h4>
+      <p>봇·연동 앱·커스텀 이모지는 이관 대상이 아니라 <b>Slack에서 새로 구축</b>해야 합니다. 또 전환 당일 100% 이동은 비현실적이라 두 도구를 함께 쓰는 기간의 혼선·강제 전환일 정책이 필요합니다.</p>
+    </div>
+  </section>
+
+  <!-- 5. 권고 -->
+  <section>
+    <h2><span class="num">5</span>권고</h2>
+    <p style="margin-top:0;">검토자 관점에서 <b>"전체 기록을 Slack으로 무손실 이관"하는 것은 비용·리스크 대비 효용이 낮습니다.</b> 다음을 권고합니다.</p>
+    <div class="rec">
+      <div class="step">
+        <div class="n">1</div>
+        <div class="body">
+          <b>기본안 — Slack에서 새로 시작 (Clean cutover)</b>
+          <p>Slack을 새 업무공간으로 만들고 채널 구조만 다시 설계해 출발. 과거 Teams 대화는 읽기전용으로 N개월 보관해 필요할 때 조회. 자주 보는 핵심 채널만 골라 CSV로 텍스트 보관(보조).</p>
+        </div>
+      </div>
+      <div class="step cond">
+        <div class="n">2</div>
+        <div class="body">
+          <b>전체 이관이 꼭 필요하다면 (조건부)</b>
+          <p>착수 전 업체 시범 이관(PoC) 필수 — Teams를 출발지로 한 방향 지원 여부 + 답글·이모지·파일·DM의 실제 보존율을 샘플로 실측. 라이선스·업체 비용 산정. DM 이관은 개인정보·노무 합의를 선결 조건으로.</p>
+        </div>
+      </div>
+      <div class="step common">
+        <div class="n">3</div>
+        <div class="body">
+          <b>공통 선행작업</b>
+          <p>현재 M365 라이선스 등급 확인 · Slack 플랜 결정 · 채널/사용자 매핑표 작성 · 봇·연동·이모지 재구축 목록화 · 병행 운영 기간과 강제 전환일 정책 수립.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. OPEN -->
+  <section>
+    <h2><span class="num">6</span>확인이 필요한 열린 질문 (OPEN)</h2>
+    <div class="open-item"><span class="id">O-1</span><span>과거 기록 무손실 이관이 필수인가, 아니면 새로 시작 허용인가</span><span class="who">의사결정자</span></div>
+    <div class="open-item"><span class="id">O-2</span><span>CloudFuze 등이 Teams→Slack 방향을 정식 지원/보증하는가 (시범 이관 실측)</span><span class="who">IT/벤더</span></div>
+    <div class="open-item"><span class="id">O-3</span><span>현재 사내 M365 라이선스 등급 (E5/컴플라이언스 보유 여부)</span><span class="who">IT/정보보안</span></div>
+    <div class="open-item"><span class="id">O-4</span><span>도입 예정 Slack 플랜 등급 (Enterprise Grid면 우회 경로 필요)</span><span class="who">IT/구매</span></div>
+    <div class="open-item"><span class="id">O-5</span><span>1:1 개인 대화 일괄 이관의 개인정보·노무 적법성</span><span class="who">법무/인사</span></div>
+    <div class="open-item"><span class="id">O-6</span><span>Teams 추출 API 승인 소요 기간·요건</span><span class="who">IT</span></div>
+    <div class="open-item"><span class="id">O-7</span><span>이관 대상 데이터 규모 → 업체 과금·처리 한계 영향</span><span class="who">IT</span></div>
+    <div class="open-item"><span class="id">O-8</span><span>봇·연동·승인앱·커스텀 이모지 인벤토리 (재구축 범위)</span><span class="who">IT/각 팀</span></div>
+    <div class="open-item"><span class="id">O-9</span><span>병행 운영 기간 및 Teams 강제 읽기전용 전환 시점</span><span class="who">IT/운영</span></div>
+  </section>
+
+  <!-- 7. 출처 -->
+  <section class="sources">
+    <h2><span class="num">7</span>참조 출처</h2>
+    <div class="group">공식 문서 (1순위)</div>
+    <ul>
+      <li><a href="https://slack.com/help/articles/204897248-Guide-to-Slack-import-and-export-tools">Slack Help Center — Guide to Slack import and export tools</a></li>
+      <li><a href="https://slack.com/help/articles/360035354694-Move-data-to-Slack-using-a-CSV-or-text-file">Slack Help Center — Move data to Slack using a CSV or text file</a></li>
+      <li><a href="https://learn.microsoft.com/en-us/purview/edisc-search-teams">Microsoft Learn — Finding content in Microsoft Teams in eDiscovery</a></li>
+      <li><a href="https://learn.microsoft.com/en-us/graph/teams-licenses">Microsoft Learn — Payment models and licensing for Teams APIs</a></li>
+      <li><a href="https://learn.microsoft.com/en-us/graph/metered-api-list">Microsoft Learn — Metered APIs and services in Microsoft Graph</a></li>
+      <li><a href="https://developer.microsoft.com/en-us/office/blogs/announcing-general-availability-of-microsoft-graph-export-api-for-microsoft-teams-messages">Microsoft 365 Dev Blog — GA of Microsoft Graph Export API for Teams messages</a></li>
+    </ul>
+    <div class="group">서드파티 (검증 전 참고용 — 대부분 Slack→Teams 방향 기준)</div>
+    <ul>
+      <li><a href="https://cloudiway.com/products/slack-migration-tool/">Cloudiway — Slack Migration Tool (출발지=Slack만 지원 확인)</a></li>
+      <li><a href="https://www.cloudfuze.com/slack-to-teams-migration/">CloudFuze — Slack to Teams Migration</a></li>
+    </ul>
+  </section>
+
+  <footer>
+    검토자 지나 · 2026-06-18 · 본 문서는 의사결정 보조용이며, 서드파티 방향 지원 여부는 시범 이관(PoC)으로 확인 필요
+  </footer>
+
+</div>
+</body>
+</html>

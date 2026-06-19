@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사내 교육 추진 기획(안) — AI에게 내 업무 맡기기 (비개발자 입문)</title>
+<style>
+  :root{
+    --ink:#2B2722; --clay:#CC785C; --clayd:#A8512F; --bg:#FAF9F7;
+    --card:#FFFFFF; --muted:#7A7065; --line:#E7E1D8; --soft:#F1EADF;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    color:var(--ink); background:#EDE7DD; line-height:1.6;
+    -webkit-font-smoothing:antialiased; padding:32px 16px; word-break:keep-all;
+  }
+  .page{
+    max-width:860px; margin:0 auto; background:var(--card);
+    box-shadow:0 8px 40px rgba(43,39,34,.12); border-radius:6px; overflow:hidden;
+  }
+  /* header */
+  .head{background:var(--ink); color:#fff; padding:38px 46px 32px;}
+  .doc-type{font-size:13px; letter-spacing:4px; color:var(--clay); font-weight:600;}
+  .head h1{font-size:30px; font-weight:700; margin-top:10px; line-height:1.3;}
+  .head .sub{font-size:15px; color:#C9C1B5; margin-top:8px;}
+  .meta{display:flex; gap:28px; flex-wrap:wrap; margin-top:22px; font-size:13px; color:#D8D0C4;}
+  .meta b{color:#fff; font-weight:600;}
+  /* approval box */
+  .approval{display:flex; justify-content:flex-end; padding:20px 46px 0; background:var(--card);}
+  table.appr{border-collapse:collapse; font-size:12px;}
+  table.appr td{border:1px solid var(--line); text-align:center; background:#fff;}
+  table.appr .lbl{background:var(--soft); color:var(--muted); width:64px; height:26px; font-weight:600;}
+  table.appr .sign{width:64px; height:64px;}
+  .body{padding:14px 46px 44px;}
+  section{margin-top:30px;}
+  h2{font-size:18px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:10px;}
+  h2 .num{display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; border-radius:50%; background:var(--clay); color:#fff; font-size:13px; font-weight:700;}
+  section > p, section > ul{margin-top:12px; font-size:14.5px; color:#3a352f;}
+  ul{padding-left:20px;} li{margin-top:6px;}
+  .lead{font-size:15px;}
+  .hl{color:var(--clayd); font-weight:700;}
+  /* stat cards */
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:16px;}
+  .stat{background:var(--soft); border-radius:12px; padding:18px 16px; text-align:center;}
+  .stat .big{font-size:30px; font-weight:700; color:var(--clayd); line-height:1.1;}
+  .stat .cap{font-size:12.5px; color:var(--muted); margin-top:6px;}
+  /* generic table */
+  table.info{width:100%; border-collapse:collapse; margin-top:14px; font-size:14px;}
+  table.info th,table.info td{border:1px solid var(--line); padding:10px 14px; text-align:left; vertical-align:top;}
+  table.info th{background:var(--soft); color:var(--ink); width:130px; font-weight:600;}
+  /* two-col cards */
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;}
+  .box{border:1px solid var(--line); border-radius:12px; padding:16px 18px;}
+  .box h3{font-size:14px; color:var(--clayd); font-weight:700; margin-bottom:8px;}
+  .box ul{padding-left:18px; margin:0;} .box li{font-size:13.5px; margin-top:5px; color:#3a352f;}
+  .callout{background:var(--ink); color:#fff; border-radius:12px; padding:20px 24px; margin-top:16px;}
+  .callout b{color:var(--clay);}
+  .timeline{margin-top:14px; font-size:14px;}
+  .timeline td{padding:8px 12px; border-bottom:1px solid var(--line);}
+  .timeline td:first-child{font-weight:600; color:var(--clayd); width:130px;}
+  .note{font-size:12.5px; color:var(--muted); margin-top:10px; font-style:italic;}
+  .opinion{margin-top:30px; border:1px solid var(--line); border-radius:12px;}
+  .opinion .t{background:var(--soft); padding:10px 16px; font-weight:700; font-size:14px; border-radius:12px 12px 0 0;}
+  .opinion .sp{height:90px;}
+  .foot{padding:18px 46px 34px; color:var(--muted); font-size:12px; border-top:1px solid var(--line); display:flex; justify-content:space-between;}
+  @media print{
+    body{background:#fff; padding:0;}
+    .page{box-shadow:none; max-width:100%; border-radius:0;}
+    section{break-inside:avoid;}
+  }
+  @media(max-width:680px){
+    .stats{grid-template-columns:1fr;} .grid2{grid-template-columns:1fr;}
+    .head,.body,.approval,.foot{padding-left:24px; padding-right:24px;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="head">
+    <div class="doc-type">사내 교육 추진 기획(안)</div>
+    <h1>AI에게 내 업무 맡기기<br>비개발자를 위한 50분 입문</h1>
+    <div class="sub">“이렇게 좋은 클로드코드, 개발자만 쓰나요?” · 비개발 직무 대상 AI 실무 활용</div>
+    <div class="meta">
+      <span>발표자 <b>임수용</b></span>
+      <span>소속 <b>개발팀</b></span>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <section>
+      <h2><span class="num">1</span> 추진 배경 및 목적</h2>
+      <p class="lead">
+        AI 도구는 더 이상 개발 부서만의 것이 아닙니다. 최근 <b>에이전트형 AI</b>는 사람이 말로 지시하면
+        문서·엑셀·자료조사 같은 실무를 <span class="hl">직접 수행해 결과물까지 만들어내는</span> 수준에 이르렀습니다.
+        그러나 사내 비개발 직무 구성원 대부분은 이러한 도구를 처음 배우기가 쉽지 않습니다.
+      </p>
+      <p>
+        본 교육의 목적은 두 가지입니다. 첫째, <span class="hl">반복·수작업 중심 업무의 생산성을 끌어올리는 것</span>.
+        둘째, 외부 의존 없이 <span class="hl">구성원 스스로 AI를 다루는 역량을 사내에 내재화하는 것</span>입니다.
+        한 번의 특강이 아니라, 구성원이 자기 업무에 직접 적용해보는 출발점을 만드는 데 초점을 둡니다.
+      </p>
+    </section>
+
+    <section>
+      <h2><span class="num">2</span> 핵심 기대 효과</h2>
+      <div class="stats">
+        <div class="stat"><div class="big">반복업무</div><div class="cap">회의록·엑셀 정리·자료조사 등<br>수작업 시간 단축</div></div>
+        <div class="stat"><div class="big">전 직무</div><div class="cap">전문지식이 없어도 AI 활용능력을<br>스스로 강화할 수 있음</div></div>
+        <div class="stat"><div class="big">내재화</div><div class="cap">외주·의존 대신<br>사내 AI 활용 문화 정착</div></div>
+      </div>
+      <div class="grid2">
+        <div class="box">
+          <h3>① 업무 생산성 향상</h3>
+          <ul>
+            <li>난잡한 회의 메모 → 안건·액션아이템 자동 정리</li>
+            <li>흩어진 엑셀 수만 행 → 함수 없이 통합·집계</li>
+            <li>설문 자유응답 수백 건 → 핵심 인사이트 요약</li>
+            <li>부서간 서로 다른 양식으로 문서변환의 자동화</li>
+          </ul>
+        </div>
+        <div class="box">
+          <h3>② AI 역량 내재화</h3>
+          <ul>
+            <li>“어디까지 되나”가 아니라 “어디부터 써볼까” 마인드셋 전환</li>
+            <li>실전형 프롬프트 작성요령 교육</li>
+            <li>반복 작업을 사내 표준 명령으로 정착(예: 주간보고 자동화)</li>
+            <li>교육 자료·노하우를 사내에 축적해 자생적 확산 기반 마련</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout">
+        본 세미나의 성공 기준은 “이해시켰는가”가 아니라
+        <b>“세미나 직후 자기 업무 하나를 직접 맡겨보게 만들었는가”</b>입니다.<br>
+        <span style="color:#C9C1B5;font-size:13.5px;">측정 지표 — 세미나 후 <b style="color:#fff;">2주 내, 참석자 1인당 최소 1건</b>의 활용 사례를 사내 Q&amp;A 채널에 공유(강제 X, 차기 세션 판단 기준).</span>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">3</span> 교육 개요</h2>
+      <table class="info">
+        <tr><th>교육명</th><td><b>AI에게 내 업무 맡기기 — 비개발자를 위한 50분 입문</b><br><span style="color:#7A7065;font-size:13px;">부제: “이렇게 좋은 클로드코드, 개발자만 쓰나요?”</span></td></tr>
+        <tr><th>대상</th><td>마케팅 · 기획 · CS · 총무 등 비개발 직무 구성원 (코드 지식 불필요)</td></tr>
+        <tr><th>진행 구성</th><td>① PPT 발표(15분) → ② 라이브 시연(30분) → ③ QnA <span class="note" style="display:inline">· 총 약 50분 + 질의</span></td></tr>
+        <tr><th>일정</th><td>7월 초 목표 (승인 후 조율 · 확정 시 사내 공지 전 재공유)</td></tr>
+        <tr><th>장소</th><td>글루타치온룸</td></tr>
+        <tr><th>발표</th><td>임수용 (개발팀)</td></tr>
+        <tr><th>모집 방식</th><td>사내 공지를 통한 자율 신청</td></tr>
+        <tr><th>성공 지표</th><td>세미나 후 2주 내, 참석자 1인당 최소 1건 활용 사례를 사내 Q&amp;A 채널에 공유</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">4</span> 프로그램 구성</h2>
+      <div class="grid2">
+        <div class="box">
+          <h3>발표 (15분)</h3>
+          <ul>
+            <li>클로드코드란? — “해주는” AI 비서</li>
+            <li>챗GPT와의 차이 = 왜 써야 하나</li>
+            <li>에이전트의 강점: “박사학위 딴 신입사원”</li>
+            <li>무엇을 맡길 수 있나 / 기본 사용 패턴</li>
+            <li>왜 덜 틀리나 — 확인·검산의 습관</li>
+          </ul>
+        </div>
+        <div class="box">
+          <h3>라이브 시연 (30분)</h3>
+          <ul>
+            <li><b>① 회의록 정리 → ② 엑셀 통합</b> <span style="color:#7A7065">(고정 앞단 · 전 직무 공감)</span></li>
+            <li>③ 파일·사진 정리 / ④ 설문 자유응답 요약 / ⑤ 보도자료 채널 변환 <span style="color:#7A7065">(보너스 슬롯)</span></li>
+            <li>⑥ 매뉴얼·정책 지식베이스화 <span style="color:#7A7065">(심화 쇼케이스)</span></li>
+          </ul>
+          <div class="note" style="margin-top:8px">실전 사례는 <b>비개발 직무가 바로 적용 가능한 것</b> 중심. 개발팀 사례는 후순위로 간단 공유.</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">5</span> 향후 확산 계획</h2>
+      <ul>
+        <li><b>세미나 직후 ~2주, 가벼운 Q&amp;A 채널(슬랙/노션) 운영</b> — 참석자 막힘 방지 + 활용 사례 수집. 쌓인 질문이 차기 세션 기획의 1순위 재료.</li>
+        <li>성공 지표(2주 내 1인 1건 공유) 달성률을 차기 세션 개최여부 판단 기준으로 활용</li>
+        <li>개인/팀에서 AI 도입 시 필요한 경우 대면지원 계획</li>
+        <li>희망하는 경우 부서별 맞춤 실습 세션(스킬·서브에이전트 등 심화 포함)</li>
+      </ul>
+    </section>
+
+  </div>
+
+  <div class="foot">
+    <span>에스더포뮬러 · 사내 교육 추진 기획(안)</span>
+    <span>발표자 임수용 (개발팀)</span>
+  </div>
+
+</div>
+</body>
+</html>

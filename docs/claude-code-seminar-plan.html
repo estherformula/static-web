@@ -65,6 +65,33 @@
   .opinion .t{background:var(--soft); padding:10px 16px; font-weight:700; font-size:14px; border-radius:12px 12px 0 0;}
   .opinion .sp{height:90px;}
   .foot{padding:18px 46px 34px; color:var(--muted); font-size:12px; border-top:1px solid var(--line); display:flex; justify-content:space-between;}
+  /* RSVP form */
+  .rsvp{background:var(--soft); border:1px solid var(--line); border-radius:12px; padding:24px 24px 26px; margin-top:16px;}
+  .rsvp .guide{font-size:14.5px; color:#3a352f; line-height:1.7;}
+  .rsvp .guide b{color:var(--clayd);}
+  .rsvp .fields{margin-top:20px; display:grid; gap:16px;}
+  .rsvp label{display:block; font-size:13px; font-weight:600; color:var(--ink); margin-bottom:7px;}
+  .rsvp label .req{color:var(--clay); margin-left:3px;}
+  .rsvp input[type=text]{width:100%; padding:12px 14px; font-size:15px; font-family:inherit; color:var(--ink);
+    background:#fff; border:1px solid var(--line); border-radius:8px; outline:none; transition:border-color .15s;}
+  .rsvp input[type=text]:focus{border-color:var(--clay);}
+  .rsvp input[type=text]::placeholder{color:#B5ABA0;}
+  .attend{display:flex; gap:10px; flex-wrap:wrap;}
+  .attend label{display:flex; align-items:center; gap:8px; margin:0; cursor:pointer; font-weight:500;
+    padding:11px 18px; background:#fff; border:1px solid var(--line); border-radius:8px; flex:1; min-width:120px;}
+  .attend input{accent-color:var(--clay); width:16px; height:16px;}
+  .attend label:has(input:checked){border-color:var(--clay); background:#FBF2EE; color:var(--clayd); font-weight:600;}
+  .rsvp .submit{margin-top:22px; width:100%; padding:14px; font-size:15px; font-weight:700; font-family:inherit;
+    color:#fff; background:var(--clay); border:none; border-radius:8px; cursor:pointer; transition:background .15s;}
+  .rsvp .submit:hover{background:var(--clayd);}
+  .rsvp .submit:disabled{background:#C9B9AE; cursor:default;}
+  .rsvp .done{display:none; text-align:center; padding:8px 0 4px;}
+  .rsvp .done .ic{font-size:34px;}
+  .rsvp .done .msg{font-size:16px; font-weight:700; color:var(--clayd); margin-top:8px;}
+  .rsvp .done .sub{font-size:13px; color:var(--muted); margin-top:4px;}
+  .rsvp.sent .guide, .rsvp.sent .fields, .rsvp.sent .submit{display:none;}
+  .rsvp.sent .done{display:block;}
+  .rsvp .err{display:none; font-size:13px; color:#C0392B; margin-top:10px; text-align:center;}
   @media print{
     body{background:#fff; padding:0;}
     .page{box-shadow:none; max-width:100%; border-radius:0;}
@@ -188,6 +215,37 @@
       </ul>
     </section>
 
+    <section>
+      <h2><span class="num">6</span> 참석 수요조사</h2>
+      <div class="rsvp" id="rsvp">
+        <p class="guide">
+          세미나 수요조사를 위해 <b>참석 여부를 꼭 알려주세요.</b><br>
+          참석을 희망하시면 아래 정보를 입력해 주세요.
+        </p>
+        <div class="fields">
+          <div class="attend">
+            <label><input type="radio" name="attend" value="참석할게요" checked> 참석할게요</label>
+            <label><input type="radio" name="attend" value="다음에할게요"> 다음에할게요</label>
+          </div>
+          <div>
+            <label for="rsvp-team">팀 <span class="req">*</span></label>
+            <input type="text" id="rsvp-team" placeholder="예) 마케팅팀" autocomplete="off">
+          </div>
+          <div>
+            <label for="rsvp-name">이름 <span class="req">*</span></label>
+            <input type="text" id="rsvp-name" placeholder="예) 임수용" autocomplete="off">
+          </div>
+        </div>
+        <button class="submit" id="rsvp-submit" type="button">참석 의사 제출하기</button>
+        <p class="err" id="rsvp-err">팀과 이름을 모두 입력해 주세요.</p>
+        <div class="done">
+          <div class="ic">✅</div>
+          <div class="msg">제출이 완료되었습니다</div>
+          <div class="sub">참석 의사를 알려주셔서 감사합니다.</div>
+        </div>
+      </div>
+    </section>
+
   </div>
 
   <div class="foot">
@@ -196,5 +254,52 @@
   </div>
 
 </div>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   참석 수요조사 — 구글폼 연결 설정 (방법 B)
+   아래 3곳만 실제 구글폼 값으로 바꾸면 작동합니다.
+
+   [구글폼 값 얻는 법]
+   1) 구글폼을 만든다 (질문 3개: 팀 / 이름 / 참석여부)
+   2) 우상단 ⋮ → '미리 채우기 링크 가져오기'에서 각 칸에 아무 값이나 넣고
+      '링크 가져오기' → 생성된 URL의 entry.000000 숫자를 복사
+   3) 폼 주소창의 .../viewform 을 .../formResponse 로 바꾼 게 FORM_ACTION
+   ───────────────────────────────────────────────────────────── */
+var FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSfzhfqdTgdWZDYhjibPQ_gIBSn7QpUUYWov-XW-MsLSsat_wQ/formResponse";
+var ENTRY = {
+  attend: "entry.1623845680",  // 참석여부 (참석할게요 / 다음에할게요)
+  team:   "entry.1131101758",  // 팀명
+  name:   "entry.650001784"    // 이름
+};
+
+(function(){
+  var box = document.getElementById('rsvp');
+  var btn = document.getElementById('rsvp-submit');
+  var err = document.getElementById('rsvp-err');
+  var teamEl = document.getElementById('rsvp-team');
+  var nameEl = document.getElementById('rsvp-name');
+
+  btn.addEventListener('click', function(){
+    var team = teamEl.value.trim();
+    var name = nameEl.value.trim();
+    var attend = (document.querySelector('input[name=attend]:checked')||{}).value || '';
+
+    if(!team || !name){ err.style.display='block'; return; }
+    err.style.display='none';
+    btn.disabled = true; btn.textContent = '제출 중…';
+
+    var fd = new FormData();
+    fd.append(ENTRY.attend, attend);
+    fd.append(ENTRY.team, team);
+    fd.append(ENTRY.name, name);
+
+    // 구글폼은 CORS 응답을 막으므로 no-cors로 보내고 성공 처리한다.
+    fetch(FORM_ACTION, { method:'POST', mode:'no-cors', body:fd })
+      .then(function(){ box.classList.add('sent'); })
+      .catch(function(){ box.classList.add('sent'); }); // no-cors라 에러도 전송은 됨
+  });
+})();
+</script>
 </body>
 </html>

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>구성변경 기능개선 — Claude Code 멀티에이전트 세션 기록</title>
+<style>
+  :root{
+    --ink:#16181d; --sub:#5b6470; --line:#e4e7ec; --bg:#f5f6f8; --card:#fff;
+    --user:#0a7d4d; --user-soft:#e7f6ee;
+    --main:#2f6df0; --main-soft:#eaf1ff;
+    --agent:#7a3ff0; --agent-soft:#f1eaff;
+    --result:#b15c00; --result-soft:#fff3e0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    line-height:1.7; -webkit-text-size-adjust:100%;}
+  .wrap{max-width:920px; margin:0 auto; padding:26px 18px 80px;}
+  header.hero{background:linear-gradient(135deg,#1f2a44,#3a59b5); color:#fff;
+    border-radius:18px; padding:30px 26px; box-shadow:0 8px 28px rgba(31,42,68,.3);}
+  header.hero .tag{display:inline-block; background:rgba(255,255,255,.18); font-size:12px;
+    padding:4px 11px; border-radius:999px; margin-bottom:13px;}
+  header.hero h1{margin:0 0 9px; font-size:24px; line-height:1.38;}
+  header.hero p{margin:0; opacity:.94; font-size:14px;}
+  .meta{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
+  .meta span{background:rgba(255,255,255,.14); border-radius:8px; padding:5px 10px; font-size:12.5px;}
+
+  section{background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:22px 22px; margin-top:18px; box-shadow:0 1px 3px rgba(0,0,0,.03);}
+  h2{font-size:19px; margin:0 0 6px; display:flex; align-items:center; gap:9px;}
+  h2 .n{background:var(--main); color:#fff; font-size:13px; min-width:26px; height:26px; padding:0 7px;
+    border-radius:8px; display:inline-flex; align-items:center; justify-content:center;}
+  h3{font-size:15px; margin:18px 0 7px;}
+  p,li{font-size:14px;}
+  .sub{color:var(--sub); font-size:13px;}
+  ul{padding-left:19px; margin:7px 0;}
+  li{margin:4px 0;}
+  code{background:#eef1f5; padding:1.5px 6px; border-radius:5px; font-size:12.5px;
+    font-family:"SF Mono",Menlo,Consolas,monospace; color:#b5326e;}
+  table{width:100%; border-collapse:collapse; margin:11px 0; font-size:13px;}
+  th,td{border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top;}
+  th{background:#f3f5f8; font-weight:700; font-size:12.5px;}
+  td.c,th.c{text-align:center;}
+
+  .legend{display:flex; flex-wrap:wrap; gap:12px; margin:10px 0;}
+  .who{display:flex; gap:9px; align-items:flex-start; background:#fafbfc; border:1px solid var(--line);
+    border-radius:11px; padding:11px 13px; flex:1 1 200px;}
+  .who .dot{width:11px; height:11px; border-radius:50%; margin-top:5px; flex:0 0 auto;}
+  .who b{font-size:13.5px;} .who p{margin:2px 0 0; font-size:12.3px; color:var(--sub);}
+
+  .turn{border:1px solid var(--line); border-radius:14px; margin:16px 0; overflow:hidden;}
+  .turn>.thead{background:#fbfcfd; padding:11px 15px; border-bottom:1px solid var(--line);
+    font-size:13px; font-weight:700; color:#34405a;}
+  .turn>.tbody{padding:14px 15px;}
+
+  .blk{border-radius:10px; padding:11px 13px; margin:9px 0; font-size:13.4px;}
+  .blk .lbl{display:inline-block; font-size:11px; font-weight:800; letter-spacing:.4px;
+    padding:2px 8px; border-radius:6px; margin-bottom:6px;}
+  .b-user{background:var(--user-soft); border-left:4px solid var(--user);}
+  .b-user .lbl{background:var(--user); color:#fff;}
+  .b-main{background:var(--main-soft); border-left:4px solid var(--main);}
+  .b-main .lbl{background:var(--main); color:#fff;}
+  .b-agent{background:var(--agent-soft); border-left:4px solid var(--agent);}
+  .b-agent .lbl{background:var(--agent); color:#fff;}
+  .b-result{background:var(--result-soft); border-left:4px solid var(--result);}
+  .b-result .lbl{background:var(--result); color:#fff;}
+  .blk p{margin:4px 0;} .blk ul{margin:4px 0;}
+
+  details{margin:7px 0; background:#fff; border:1px dashed #c8d2e0; border-radius:9px; padding:0 12px;}
+  details summary{cursor:pointer; font-size:12.5px; font-weight:700; padding:9px 0;}
+  details.u summary{color:var(--user);}
+  details.a summary{color:var(--agent);}
+  details[open]{padding-bottom:10px;}
+  details .pp{font-size:12.5px; color:#243; white-space:pre-wrap; background:#f7f9fb;
+    border-radius:7px; padding:10px 12px; margin:4px 0; line-height:1.62; word-break:break-word;}
+
+  .pill{display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px;}
+  .p-ok{background:#e6f6ee; color:#1f9d57;}
+  .filelist li{margin:6px 0;}
+  footer{margin-top:26px; text-align:center; color:var(--sub); font-size:12.3px;}
+  .note{background:#fff8e6; border:1px solid #f0dca0; border-radius:10px; padding:11px 14px; font-size:12.7px; margin:12px 0;}
+  @media (max-width:640px){
+    .wrap{padding:16px 11px 60px;} header.hero h1{font-size:20px;} h2{font-size:17px;}
+    table{font-size:12px;} th,td{padding:6px 7px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="tag">Claude Code · 멀티에이전트 워크플로우 기록</span>
+    <h1>구독 '구성변경' 기능개선<br>— 기획 검토부터 디자인 시안까지 한 세션</h1>
+    <p>기획 초안 한 장에서 출발해 ① 엔지니어형 기획 검토 ② 1:1 미팅으로 블로커 해소 ③ iOS 코드 교차검증 ④ 디자인 시안 생성까지, 여러 전문 에이전트를 오케스트레이션한 전 과정 기록</p>
+    <div class="meta">
+      <span>📅 2026-06-24</span>
+      <span>🏢 EstherPack iOS</span>
+      <span>🤖 메인 + 에이전트 3종(지나·Explore·안나)</span>
+      <span>✅ 블로커 0 · 기획 확정 · 시안 완성</span>
+    </div>
+  </header>
+
+  <section>
+    <h2><span class="n">개요</span>무엇을 했나</h2>
+    <p><b>주제:</b> 구독 상세화면의 '구성변경'을 채널톡 대신 신설 1:1문의로 받아 <b>'좀비 구독'</b>(일시정지됐는데 상담은 진행 안 되는 상태)을 원천 차단하는 기능개선.</p>
+    <p><b>진행 방식:</b> 사람(기획자)이 메인 Claude에게 지시하면, 메인이 작업 성격에 맞는 <b>전문 에이전트</b>를 띄워 검토·조사·디자인을 맡기고 결과를 종합했습니다. 한 세션 안에서 기획 검토 → 항목별 의사결정 → 코드 사실확인 → 디자인 시안까지 끝냈습니다.</p>
+
+    <h3>참여한 에이전트</h3>
+    <div class="legend">
+      <div class="who"><span class="dot" style="background:#2f6df0;"></span><div><b>메인 Claude</b><p>오케스트레이터. 사용자와 대화하고 에이전트에 작업 분배, 결과 종합·문서화</p></div></div>
+      <div class="who"><span class="dot" style="background:#7a3ff0;"></span><div><b>지나 (jina)</b><p>엔지니어형 기획 검토 페르소나. 블로커·논리오류·정책충돌 검증</p></div></div>
+      <div class="who"><span class="dot" style="background:#7a3ff0;"></span><div><b>Explore</b><p>코드 조사 전용 에이전트. iOS 레포에서 실제 동작 근거 확인</p></div></div>
+      <div class="who"><span class="dot" style="background:#7a3ff0;"></span><div><b>안나 (ui-designer)</b><p>디자인 에이전트. Figma 시안 생성·수정, 디자인 토큰 준수</p></div></div>
+    </div>
+    <div class="note">📌 <b>읽는 법:</b> 시간 순 기록입니다. <span class="pill" style="background:#e7f6ee;color:#0a7d4d;">사용자</span> 지시 → <span class="pill" style="background:#eaf1ff;color:#2f6df0;">메인</span> 처리 → <span class="pill" style="background:#f1eaff;color:#7a3ff0;">에이전트</span> 수행 → <span class="pill" style="background:#fff3e0;color:#b15c00;">결과물</span> 순. <b>사용자가 보낸 프롬프트 전문</b>은 "▶ 사용자 프롬프트 전문"을, <b>에이전트에게 보낸 지시</b>는 "▶ 지시 프롬프트 보기"를 펼치면 그대로 확인할 수 있습니다.</div>
+  </section>
+
+  <!-- STEP 1 -->
+  <section>
+    <h2><span class="n">1</span>기획 검토 의뢰 — 블로커·누락 진단</h2>
+    <div class="turn">
+      <div class="tbody">
+        <div class="blk b-user"><span class="lbl">사용자</span>
+          <p>구성변경 기능개선 초안([개요]/[as-is]/[to-be])으로 지나에게 검토시키고 ⓪폴더 생성 ①블로커 점검 ②부족한 부분 채워 md 저장.</p>
+          <details class="u"><summary>▶ 사용자 프롬프트 전문</summary><div class="pp">에스더팩의 구독상세화면에서 '구성변경' 기능이 있는데 기능 개선을 하기위해 기획을 진행할거야
+아래 내용으로 계획을 짰는데 이 기준으로 지나에게 검토시키고 아래 순서로 일을 진행해
+0. 스펙리뷰 폴더에 이 건을 진행할 폴더를 하나 만들고
+1. 블로커가 있는지 점검
+2. 언급되지않은 부족한 부분을 채워서 md파일로 저장
+
+제목 : 1:1문의 기능을 이용한 구성변경 기능개선
+
+[개요]
+- 구독 상세화면에서 사용자가 직접 구성변경을 요청할 수 있다
+- 사용자가 구성변경을 누르면 채널톡이 열리면서 구독을 일시정지하게된다
+- 채널톡의 워크플로우는 별도 솔루션에서 진행되므로 진행상태를 알 수 없다
+- 사용자가 채널톡에서 액션을 수행하지 않으면 상담원에게 상담이 전달되지 않는다
+- 이렇게 되면 구독은 일시정지 되었지만 구성변경 상담은 진행되지 않는 상태가 된다
+- 신설된 1:1문의 기능을 이용하면 사용자가 문의를 등록완료하는 시점에 구독을 일시정지 시킬 수 있으니 좀비상태의 구독을 만들지 않아도 된다
+
+[as-is]
+- 사용자가 구독상세 화면에서 구성변경 버튼 클릭
+- 채널톡 워크플로우 오픈 (구성변경 = "780572")
+- 동시에 '구독일시정지 API' 를 호출하여 구독을 일시정지한다
+
+[to-be]
+- 사용자가 구독상세 화면에서 구성변경 버튼 클릭
+- 1:1문의 입력폼이 나타나며 구성변경 요청내용을 사용자가 입력할 수 있다
+    - 기존 1:1문의 입력폼과 다르게 '문의 유형', '연결 주문', '제목', '이미지 첨부'가 없다
+    - 필수입력 : '내용', '알림수단'
+    - 문의등록 API 요청시 구독번호(subscription_number) 를 파라미터에 포함시킨다
+- 등록완료시 '구성변경이 요청되었어요.\n완료되면 알려드릴게요.' 토스트가 노출
+- 구독 일시정지는 해당 문의가 접수되는 순간 BE에서 처리한다
+- 구성변경 1:1문의 유형 타입을 신규로 추가한다 (적절한 이름 제안)
+    - 이 유형은 고객센터의 1:1문의에서는 입력할 수 없다 (선택지에 노출되지 않음)</div></details>
+        </div>
+        <div class="blk b-main"><span class="lbl">메인</span>
+          작업 폴더 생성 → 재활용 기반인 기존 1:1문의 기획서를 먼저 읽어 컨텍스트 확보 → 지나에게 검토 의뢰.
+        </div>
+        <div class="blk b-agent"><span class="lbl">에이전트 · 지나</span>
+          <b>수행:</b> 초안과 실제 출시 1:1문의 정책·구독 정책·iOS 가이드를 교차 검토. <b>블로커 3건 + 진행가능 우려 11건 + 결정필요 8건</b> 도출.
+          <details class="a"><summary>▶ 메인이 지나에게 보낸 지시 프롬프트 보기</summary><div class="pp">에스더팩 iOS 앱의 구독 상세화면 '구성변경' 기능 개선 기획을 엔지니어적 관점으로 검토해줘. 산출물은 (A) 블로커 목록, (B) 언급되지 않은 누락/모호 항목 두 가지. 최종적으로 md 기획서로 정리할 거라 구조적으로 줘.
+
+[검토 대상] 사용자 초안(제목/개요/as-is/to-be) 전체 첨부.
+[중요 배경] 재활용 기반이 되는 기존 신규 "1:1문의" 게시판 기능 스펙 요약: 대상(iOS 회원전용), 작성폼 필드(유형 8종/연결주문/연결상품/제목/내용/이미지첨부/알림수단), 상태값(RECEIVED/IN_PROGRESS/ANSWERED/CLOSED→접수/답변완료), 1문의1답변, 딥링크, BE API, 작성완료 후 랜딩=S3, 로깅 이벤트. 전체 스펙 파일 경로 제공.
+[꼭 짚을 관점 11개] ①일시정지 타이밍 충돌 ②중도 이탈/실패 ③구독 상태별 진입 ④'완료' 정의·재개 주체 ⑤유형 노출 정책 ⑥subscription_number 파라미터 ⑦중복요청 ⑧채널톡 780572 폐기 ⑨폼 신규/재사용 ⑩로깅 ⑪BE 의존성.
+블로커(▲)와 진행가능 우려(●○)를 명확히 구분, 보고 최상단에 블로커만 요약. 각 누락에 권장안(default)도 함께.</div></details>
+        </div>
+        <div class="blk b-result"><span class="lbl">결과물</span>
+          <ul>
+            <li><code>구성변경_1대1문의_기능개선_기획.md</code> — 검토 반영 기획서</li>
+            <li><code>구성변경-1대1문의-OPEN.md</code> — 미결 트래커(OPEN 8건)</li>
+          </ul>
+          <p class="sub">핵심 발견: 메인이 넘긴 1:1문의 요약이 <b>실제 출시 정책과 일부 불일치</b>(알림수단 필수 여부 등)함을 지나가 교차검증으로 적발 → 블로커 B-3.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section>
+    <h2><span class="n">2</span>1:1 미팅 — OPEN 8건 항목별 확정</h2>
+    <div class="blk b-user"><span class="lbl">사용자</span>
+      <p>지나와 1:1 미팅 모드로 전환, 개별 건마다 대화로 확정 진행. (이후 "다음 건으로" 등으로 한 건씩)</p>
+      <details class="u"><summary>▶ 사용자 프롬프트 전문 (1:1 모드 전환 + 각 건 결정)</summary>
+        <div class="pp">[모드 전환]
+지나와 1:1미팅 모드로 바꿔줘. 문서 전체가 아니라 나와 개별 건마다 대화해서 블로커를 해결하거나 최종 확정하거나 하자
+
+[OPEN-1 일시정지 트리거]
+트랜잭션 보장으로 BE와 합의 가능, 그렇게 확정하자
+
+[진행] 다음 건으로 넘어가자
+
+[OPEN-2 subscription_number]
+API 문서에 보면 해당 필드가 정의되어있음.
+
+[OPEN-2 잔여 2건]
+1. 소유검증은 BE에서 진행하도록 명시, 타인의 구독건으로 구성변경 문의등록을 하려고 하면 에러를 내려줘야 함. 2. BE에서 보장하도록 구현해야 함.
+
+[진행] 다음 건으로 넘어가자
+
+[OPEN-3 폼 활성조건]
+1. 승인, 2. '구성변경 요청', 3. 숨김
+
+[진행] 다음 건으로 넘어가자
+
+[OPEN-4 완료 정의·재개]
+시스템적으로 묶지않고 '기존 방식대로' NC팀에서 구성변경완료 후 직접 구독 재개 실행함. 다음결제일 등 사람이 확인하고 재개하는게 더 안전함. 어드민 화면에서 해당 구독번호가 노출되고 누르면 구독상세로 이동하는 기능도 현재 존재하므로 자연스럽게 해당 업무 처리가능
+
+[진행] 다음 건으로 넘어가자
+
+[OPEN-5 유형코드·라벨·수정화면]
+1: 승인, 2: '구성변경 요청', 3: 승인, + 1:1문의가 접수/처리중 상태인 경우 사용자가 문의를 수정할 수 있는데 이 때에도 셀렉트박스에 기본선택 되어있고 수정가능한 UI야. 1:1문의 수정 화면에서 구성변경 타입의 문의인 경우 수정화면을 별도로 구성해서 입력폼과 통일시켜야 함. (수정은 가능하되 유형,제목,첨부이미지 등을 수정하면 안되므로) 화면 디자인 할 때 1:1문의 수정화면도 이 내용이 반영되도록 기획에 포함시켜
+
+[OPEN-5 배지/제목 라벨]
+배지="구성변경" / 제목="구성변경 요청"으로 하자
+
+[OPEN-6 관련 — iOS 코드 확인 요청]
+내 기억으로는 구성변경->일시정지 상태일 때 구성변경 버튼이 사용자에게 미노출되는걸로 알고있는데 진짜로 그런지 iOS 개발자에게 확인해줘
+
+[OPEN-6 중복방지]
+일어나기 힘든 일이긴 한데 굳이 멱등으로 막을 필요는 없을것같아 (구현이 더 복잡해지기도 하고) 만약 추가요청이 들어오면 문의 자체는 등록하고 구독상태만 '이미 일시정지이면 그대로 둔다' 라고 명시하면 어떨까?
+
+[진행] 다음 건으로 가자
+
+[OPEN-7 상태별 진입]
+1: 승인, 2: 현행 유지
+
+[진행] 다음으로 가자
+
+[OPEN-8 데이터 로깅]
+1: 승인, 2: 부분 승인(entry 추가안함. 직전 screenLoaded 이벤트로 확인하는게 맞다고 생각함), 3: 승인</div></details>
+    </div>
+    <div class="blk b-main"><span class="lbl">메인</span>
+      지나를 1:1 진행 모드로 전환. 각 OPEN 건마다 [쟁점→왜 막힘→권장안→결정 포인트]로 질문하게 하고, 사용자 답을 받아 "CLOSED 확정문"으로 마감하는 루프를 8회 반복.
+    </div>
+    <p class="sub" style="margin-top:10px;">각 건의 사용자 결정과 지나 확정 결과:</p>
+    <table>
+      <tr><th class="c">OPEN</th><th>쟁점</th><th>사용자 결정 → 확정</th></tr>
+      <tr><td class="c"><span class="pill p-ok">1</span></td><td>일시정지 트리거 (BE 의존)</td><td>"트랜잭션 보장으로 합의 가능" → 문의 저장+구독 일시정지를 <b>BE 단일 트랜잭션</b>(실패 시 롤백·등록실패)</td></tr>
+      <tr><td class="c"><span class="pill p-ok">2</span></td><td><code>subscription_number</code> 파라미터</td><td>"API 문서에 필드 이미 정의됨" → 신설 불필요. BE 소유검증 + 트랜잭션 입력으로 일시정지 실행</td></tr>
+      <tr><td class="c"><span class="pill p-ok">3</span></td><td>폼 등록 활성조건 충돌</td><td>"자동주입 승인 / 제목='구성변경 요청' / 숨김" → 유형·제목 클라 자동주입, BE 검증 현행 유지</td></tr>
+      <tr><td class="c"><span class="pill p-ok">4</span></td><td>'완료' 정의 · 구독 재개</td><td>"시스템 결합 X, NC가 직접 재개(사람 확인이 안전)" → 재개=NC 수동, 카피는 재개 단정 금지</td></tr>
+      <tr><td class="c"><span class="pill p-ok">5</span></td><td>신규 유형코드·라벨·정책</td><td>"코드 승인 / 배지=구성변경, 제목=구성변경 요청 / 수정화면도 반영" → 9번째 유형 + 전용 수정폼</td></tr>
+      <tr><td class="c"><span class="pill p-ok">6</span></td><td>중복 요청 방지</td><td>(iOS 코드 확인 후) "멱등 대신 간단히: 문의는 등록, 이미 정지면 유지" → 기존 노출로직으로 충분</td></tr>
+      <tr><td class="c"><span class="pill p-ok">7</span></td><td>구독 상태별 진입 분기</td><td>"승인 / 현행 유지" → 기존 ACTIVE-only 노출 유지, 세분 분기 미도입</td></tr>
+      <tr><td class="c"><span class="pill p-ok">8</span></td><td>데이터 로깅</td><td>"승인 / entry 미추가(직전 화면으로 추적)" → 기존 이벤트 재사용 + 코드값만 추가</td></tr>
+    </table>
+
+    <div class="turn">
+      <div class="thead">미팅 중 코드 사실확인 — Explore 에이전트 투입</div>
+      <div class="tbody">
+        <div class="blk b-user"><span class="lbl">사용자</span>
+          <p>"구성변경→일시정지 상태일 때 구성변경 버튼이 미노출되는 걸로 아는데, 진짜인지 iOS 개발자에게 확인해줘." (전문은 위 1:1 열림박스 참조)</p>
+        </div>
+        <div class="blk b-agent"><span class="lbl">에이전트 · Explore</span>
+          <b>수행:</b> iOS 레포에서 구독상세 버튼 노출 로직을 추적. <b>결론: 사용자 기억이 맞음</b> — 구독 상태는 <code>ACTIVE/PAUSED/CANCELLED</code> 3개뿐, 구성변경 버튼은 <code>canChangeGoods</code>로 <b>ACTIVE에서만 노출</b>(단위 테스트로 고정).
+          <details class="a"><summary>▶ 메인이 Explore에게 보낸 지시 프롬프트 보기</summary><div class="pp">EstherPack iOS 코드베이스에서 "구독이 일시정지(paused) 상태일 때 구성변경 버튼이 미노출(숨김/비활성)되는가?"를 코드 근거로 확인해줘(very thorough). 찾을 것: ①구독 상세 ViewController/View/ViewModel ②'구성변경' 버튼(한글/영문, 채널톡 워크플로우 코드 780572도 단서) ③버튼 isHidden/isEnabled 노출 분기가 구독 상태값과 연결됐는지 ④구독 상태 enum 정의(일시정지 해당값) ⑤일시정지 API·채널톡 오픈 로직. 보고: 결론(그렇다/아니다/조건부) + 근거 코드(파일:줄) + 상태 enum 값 + 노출 조건 전체. 추측 금지, 실제 파일·줄번호로.</div></details>
+        </div>
+        <div class="blk b-main"><span class="lbl">메인</span>
+          이 코드 사실을 지나에게 전달 → OPEN-6(중복방지)·OPEN-7(진입분기)이 "기존 노출 로직으로 이미 해결"임이 드러나 <b>신규 구현 다수 제거</b>. 범위가 크게 가벼워짐.
+        </div>
+        <div class="blk b-result"><span class="lbl">결과물</span>
+          OPEN 8건 전부 CLOSED → 기획서·OPEN 트래커에 일괄 반영. 블로커 3건 중 실제 BE 신규작업은 1건으로 축소.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section>
+    <h2><span class="n">3</span>공유용 정리 + 디자인 착수 검토</h2>
+    <div class="turn">
+      <div class="tbody">
+        <div class="blk b-user"><span class="lbl">사용자</span>
+          <p>BE/NC 공유용 HTML 정리 + 안나에게 디자인 시안 가능 여부 검토.</p>
+          <details class="u"><summary>▶ 사용자 프롬프트 전문</summary><div class="pp">BE, NC 에 내용 공유하고 피드백을 받을거야. 지금까지 정해진 기획으로 사람이 보기 편하게 html로 기획 정리해줘. 그리고 안나에게 디자인 시안 뽑을수있는지 검토시켜줘</div></details>
+        </div>
+        <div class="blk b-main"><span class="lbl">메인</span>
+          BE/NC 공유용 HTML 작성(BE 작업·NC 운영을 색 배지로 강조) + 안나에게 디자인 착수 가능성 검토 의뢰.
+        </div>
+        <div class="blk b-agent"><span class="lbl">에이전트 · 안나</span>
+          <b>수행:</b> 확정 기획 + 기존 1:1문의 Figma 자산 분석. <b>판정: 즉시 착수 가능(FULL GO), 블로커 0건.</b> 신규는 경량(작성폼 변형·배지 1종·시트 카피). 디자인 미결 3건(안내문/구독요약/시트버튼) 식별.
+          <details class="a"><summary>▶ 메인이 안나에게 보낸 지시 프롬프트 보기</summary><div class="pp">확정된 '구성변경 기능개선' 기획으로 Figma 디자인 시안을 뽑을 수 있는지 착수 가능성을 검토해줘(지금 그리지 말고 판정만). 확정 기획서와 재활용 기반 1:1문의 기획서, 기존 1:1문의 Figma 작업물을 읽어라. 디자인 핵심: 작성폼을 mode:subscriptionChange 변형 모드로 재사용(내용·알림수단만 노출), 완료 바텀시트 재사용+카피 분기, S3/S4에 '구성변경' 배지 추가, 수정화면도 전용폼, 진입점=구독상세 기존 버튼. 알려줘: ①착수 준비도(충분/조건부/부족) ②새로 그릴 화면/상태 ③재사용 vs 신규 ④디자인 관점 갭/모호 ⑤블로커. 실제 작화 말고 판정+갭 리스트만.</div></details>
+        </div>
+        <div class="blk b-result"><span class="lbl">결과물</span>
+          <code>구성변경_1대1문의_기능개선_기획.html</code> (BE/NC 공유용) + 디자인 착수검토 리포트(디자인 미결 D-1~3을 OPEN 트래커에 등재).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section>
+    <h2><span class="n">4</span>디자인 시안 생성</h2>
+    <div class="turn">
+      <div class="tbody">
+        <div class="blk b-user"><span class="lbl">사용자</span>
+          <p>지나가 디자인 미결을 피드백해 확정하고, 안나가 바로 시안 작업.</p>
+          <details class="u"><summary>▶ 사용자 프롬프트 전문</summary><div class="pp">시안이니까 지나가 적절하게 피드백해서 안나가 바로 시안 작업하게 해줘</div></details>
+        </div>
+        <div class="blk b-agent"><span class="lbl">에이전트 · 지나</span>
+          <b>수행:</b> 디자인 미결 3건을 시안용으로 확정 — D-1 폼 상단 안내문 카피, D-2 대상 구독 요약 카드(팩 이름 단독·읽기전용), D-3 완료시트 단일 [확인]→구독상세 복귀.
+        </div>
+        <div class="blk b-agent"><span class="lbl">에이전트 · 안나</span>
+          <b>수행:</b> 지나 확정값으로 Figma에 구성변경 시안 6프레임 생성. 기존 1:1문의 v2 자산 클론 변형 + EstherPack 토큰 바인딩(off-token 0), 자가검수 게이트 통과.
+          <details class="a"><summary>▶ 메인이 안나에게 보낸 시안 착수 지시 프롬프트 보기</summary><div class="pp">디자인 미결 3건이 지나 피드백으로 확정됐다. 이제 실제 구성변경 시안 작업에 착수해줘. D-1 안내문(확정 카피 2줄: "변경하실 구성을 자유롭게 적어주세요. / 요청을 접수하면 영양상담사가 확인 후 도와드려요."), D-2 구독 요약 카드(팩 이름 단독, 읽기전용, 구독번호 미노출), D-3 완료 바텀시트(단일 [확인]→구독상세 복귀, [내 문의 보기] 제거, 기기알림 켜기 조건부 유지). 폼 구성(위→아래): 네비 타이틀 "구성 변경 요청" → 안내문 → 대상 구독 카드 → 내용(카운터) → 알림수단 → 하단 [등록하기]. 전역 UI 규칙(색=토큰, 폰트=스타일, 공용 컴포넌트 재사용, SnapKit/Then, raw 금지) 준수, 기존 v2 시안 베이스 변형. Figma 작화 가능하면 그려라. 막히면 무엇이 필요한지 알려라.</div></details>
+        </div>
+        <div class="blk b-result"><span class="lbl">결과물 · Figma 시안 (1차)</span>
+          작성폼(활성/비활성), 수정폼, '구성변경' 배지, 완료시트(기본/알림권장) — 총 6프레임. (Figma 파일 "APP-UI-with-AI", 페이지 "1:1 문의")
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section>
+    <h2><span class="n">5</span>시안 피드백 반영 (3차례)</h2>
+
+    <div class="turn">
+      <div class="thead">⑤-A 로직 주석 겹침 + 에이전트 규칙 보강</div>
+      <div class="tbody">
+        <div class="blk b-user"><span class="lbl">사용자</span>
+          <p>[로직] 코멘트가 화면과 겹침 → 프레임 아래로 배치 수정 + 안나 규칙에 영구 반영.</p>
+          <details class="u"><summary>▶ 사용자 프롬프트 전문</summary><div class="pp">디자인시안 피드백줄게 반영해줘
+- [로직] 코멘트를 화면마다 달아놨는데 위치가 화면이랑 겹쳐있음. 프레임 사이즈가 큰 경우 제대로 프레임 아래에 배치되도록 수정하고 앞으로도 그렇게 하게 안나 규칙에 넣어줘</div></details>
+        </div>
+        <div class="blk b-main"><span class="lbl">메인</span>
+          ① 안나에게 현재 시안 주석 재배치 지시 ② 안나의 영구 규칙 파일(상시 강제 + 자가검수 게이트)에 "주석은 프레임 높이 아래 간격 두고 배치, 겹침 금지" 규칙 추가.
+        </div>
+        <div class="blk b-agent"><span class="lbl">에이전트 · 안나</span>
+          <b>수행:</b> 각 주석을 프레임 실제 높이(y+height) 아래 32px 간격으로 재배치, 겹치던 행은 아래로 이동. <b>겹침 검증 0건.</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="turn">
+      <div class="thead">⑤-B 기존 화면 연결 + 상태 화면 + 화면 전이</div>
+      <div class="tbody">
+        <div class="blk b-user"><span class="lbl">사용자</span>
+          <p>기존 구독상세 연결점 + 내 문의내역(구성변경 건) + 문의상세(답변대기) 추가, 화면 전이(클릭→이동) 표현.</p>
+          <details class="u"><summary>▶ 사용자 프롬프트 전문</summary><div class="pp">아래 내용도 시안에 반영해줘
+1. 기존화면과의 연결점도 시안에 함께 포함되었으면 좋겠어
+기존 구독상세화면 - (Figma 링크)
+2. 1:1문의 - 내 문의내역 화면에 구성변경 건이 존재하는 상황 화면
+3. 1:1문의 - 문의상세 화면에 구성변경 건 상세화면 (답변대기중)
+위 화면들 추가하고 화면에서 어디를 클릭하면 어느 화면으로 넘어가는지도 표현해줄 수 있어?</div></details>
+        </div>
+        <div class="blk b-agent"><span class="lbl">에이전트 · 안나</span>
+          <b>수행:</b> 진입점(기존 구독상세, 외부 파일이라 스크린샷 참조본)·내 문의내역(S3', 구성변경 셀 포함)·문의상세(S4', 답변대기) 3프레임 추가 + <b>화면 전이 화살표 5개</b>(탭 대상 라벨 포함). 겹침 0.
+          <details class="a"><summary>▶ 메인이 안나에게 보낸 지시 프롬프트 보기</summary><div class="pp">구성변경 SC 그룹에 추가: ① 기존 구독상세 화면(외부 Figma 파일)을 진입점 참조로 배치 — '구성변경' 버튼이 출발점(ACTIVE에서만 노출) ② 내 문의내역(S3)에 '구성변경' 배지+접수+제목 셀이 일반 셀과 섞인 화면 ③ 문의상세(S4) 구성변경 건 답변대기(접수, "답변을 준비하고 있어요") ④ 화면 전이를 연결선+라벨로 표현: 구독상세[구성변경]→작성폼 / 작성폼[등록하기]→완료시트 / 완료시트[확인]→구독상세 복귀 / S3[구성변경 셀]→S4 / 답변완료 푸시·알림톡→S4(외부진입 라벨만). connector 막히면 화살표+라벨로 대체. 다른 파일 클론이 막히면 무엇이 가능/불가한지 알려라. 로직 주석은 새 규칙(프레임 높이 아래 32px, 겹침 금지)대로.</div></details>
+        </div>
+        <div class="blk b-result"><span class="lbl">기술 메모</span>
+          <span class="sub">다른 Figma 파일의 프레임은 직접 클론 불가(Plugin API 단일 파일 제약) → 진입 구독상세는 스크린샷 참조본으로 배치. connector는 design mode 차단 → 화살표+라벨로 대체.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="turn">
+      <div class="thead">⑤-C 뱃지 색 통일 (2건)</div>
+      <div class="tbody">
+        <div class="blk b-user"><span class="lbl">사용자</span>
+          <p>'구성변경' 뱃지를 기존처럼 회색으로 통일. 이어서 '접수' 뱃지도 회색으로 맞춤.</p>
+          <details class="u"><summary>▶ 사용자 프롬프트 전문 (2건)</summary><div class="pp">[1] (Figma 링크) 여기에 문의리스트 뱃지가 기존과 색상이 달라 '구성변경' 뱃지만 색상을 다르게 만들 이유가 없으니 기존처럼 회색 뱃지로 동일하게 넣어줘
+
+[2] 접수 뱃지는 다른데서는 회색인데 이번에 만든것만 primary야 이것도 맞춰야지</div></details>
+        </div>
+        <div class="blk b-agent"><span class="lbl">에이전트 · 안나</span>
+          <b>수행:</b> '구성변경' 유형 뱃지를 기존 유형 뱃지와 동일한 회색(gray100/gray800)으로 통일. '접수' 상태 뱃지는 실수로 '답변완료' 초록이 들어가 있던 것을 발견해 기존 '접수' 회색(gray200/gray700)으로 정정. 색 설명 문구도 갱신. off-token 0.
+        </div>
+        <div class="blk b-result"><span class="lbl">결과물</span>
+          뱃지 체계가 기존 앱과 완전 일관: 유형=회색 / 접수=회색 / 답변완료=초록.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 6 -->
+  <section>
+    <h2><span class="n">6</span>세션 기록 외부 공유 (본 문서)</h2>
+    <div class="blk b-user"><span class="lbl">사용자</span>
+      <p>이번 세션 내용을 외부공유용 HTML로 만들고 GitHub 배포. 사용자 프롬프트는 생략 말고 열림박스로 전문 포함.</p>
+      <details class="u"><summary>▶ 사용자 프롬프트 전문</summary><div class="pp">이번세션에서 진행한 내용 외부공유용으로 만들어줘. 포함할 내용은 이것들이야 [내가 쓴 프롬프트, 메인클로드의 답변, 메인클로드가 에이전트에게 지시한 프롬프트, 에이전트가 수행한 일(1~2줄요약), 최종결과물(파일명,피그마시안 등 결과물리스트). html파일로 만들고 깃허브 배포까지 진행해
+
+(추가 지시) 내가 쓴 프롬프트를 생략하지말고 열림박스를 이용해 전체 그대로 넣어줘</div></details>
+    </div>
+    <div class="blk b-main"><span class="lbl">메인</span>
+      세션 전 과정을 시간 순으로 정리(사용자 프롬프트 전문은 열림박스, 에이전트 지시 프롬프트도 열림박스) → 본 HTML 작성 → GitHub Pages(static-web) 배포.
+    </div>
+  </section>
+
+  <!-- 최종 산출물 -->
+  <section>
+    <h2><span class="n">★</span>최종 산출물 리스트</h2>
+    <h3>문서 (폴더: <code>구성변경_1대1문의_기능개선/</code>)</h3>
+    <ul class="filelist">
+      <li><code>구성변경_1대1문의_기능개선_기획.md</code> — 확정 기획서(블로커 0, OPEN 8건 CLOSED, iOS 코드 근거 포함)</li>
+      <li><code>구성변경_1대1문의_기능개선_기획.html</code> — BE/NC 공유용 (BE 작업·NC 운영 강조)</li>
+      <li><code>구성변경-1대1문의-OPEN.md</code> — 미결 트래커(OPEN 8건 + 디자인 D-1~3 전부 CLOSED, 후속 액션 트랙)</li>
+      <li><code>구성변경_세션기록_외부공유.html</code> — 본 문서(세션 전 과정 기록)</li>
+    </ul>
+    <h3>Figma 디자인 시안 (파일 "APP-UI-with-AI", 페이지 "1:1 문의")</h3>
+    <table>
+      <tr><th>프레임</th><th>내용</th></tr>
+      <tr><td>구성변경 작성폼 (활성)</td><td>안내문 → 대상 구독 카드 → 내용 → 알림수단 → [등록하기]</td></tr>
+      <tr><td>구성변경 작성폼 (CTA 비활성)</td><td>내용 미입력 상태, 등록 버튼 비활성</td></tr>
+      <tr><td>구성변경 수정폼</td><td>내용·알림수단만 수정, CTA "수정하기"</td></tr>
+      <tr><td>'구성변경' 유형 배지</td><td>기존 유형 뱃지와 동일 회색</td></tr>
+      <tr><td>등록완료 바텀시트 (기본)</td><td>단일 [확인] → 구독상세 복귀</td></tr>
+      <tr><td>등록완료 바텀시트 (알림권장)</td><td>+ 조건부 [기기 알림 켜기]</td></tr>
+      <tr><td>진입 구독상세 (참조본)</td><td>'구성변경' 버튼 = 출발점</td></tr>
+      <tr><td>내 문의내역 S3'</td><td>구성변경 건 셀 포함(배지·접수)</td></tr>
+      <tr><td>문의상세 S4'</td><td>구성변경 건 답변대기("답변을 준비하고 있어요")</td></tr>
+      <tr><td>화면 전이 화살표 ×5</td><td>탭 대상 라벨 포함 플로우</td></tr>
+    </table>
+    <h3>부수 효과 — 에이전트 규칙 개선</h3>
+    <ul>
+      <li>안나(ui-designer) 규칙에 <b>"로직 주석은 프레임 높이 아래 배치·겹침 금지"</b>를 상시 강제 + 자가검수 게이트로 영구 반영 → 이후 모든 디자인 작업에 자동 적용.</li>
+    </ul>
+  </section>
+
+  <!-- 인사이트 -->
+  <section>
+    <h2><span class="n">＋</span>이 세션이 보여준 것</h2>
+    <ul>
+      <li><b>교차검증으로 환상 제거:</b> 메인이 넘긴 요약이 실제 정책과 어긋난 부분을 지나가, "버튼 미노출" 가정을 Explore가 코드로 확인. <b>사실 기반으로 범위가 줄었다</b>(블로커 3→실질 1, 신규 구현 다수 제거).</li>
+      <li><b>의사결정은 사람이, 정리는 에이전트가:</b> 8건의 트레이드오프를 사람이 한 건씩 결정하고, 에이전트가 확정문·문서·시안으로 즉시 변환.</li>
+      <li><b>피드백이 규칙이 된다:</b> "주석 겹치지 마"라는 일회성 교정을 에이전트 영구 규칙으로 승격 → 반복 교정 비용 제거.</li>
+    </ul>
+  </section>
+
+  <footer>
+    EstherPack · 구성변경 기능개선 멀티에이전트 세션 기록 · 2026-06-24<br>
+    Claude Code (메인 + 지나·Explore·안나)
+  </footer>
+
+</div>
+</body>
+</html>

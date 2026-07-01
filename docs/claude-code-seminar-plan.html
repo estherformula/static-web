@@ -92,6 +92,10 @@
   .rsvp.sent .guide, .rsvp.sent .fields, .rsvp.sent .submit{display:none;}
   .rsvp.sent .done{display:block;}
   .rsvp .err{display:none; font-size:13px; color:#C0392B; margin-top:10px; text-align:center;}
+  .rsvp.closed{text-align:center; padding:30px 24px 32px;}
+  .rsvp.closed .ic{font-size:34px;}
+  .rsvp.closed .msg{font-size:17px; font-weight:700; color:var(--clayd); margin-top:10px;}
+  .rsvp.closed .sub{font-size:13.5px; color:var(--muted); margin-top:10px; line-height:1.7;}
   /* slack CTA */
   .slack-cta{display:flex; align-items:center; gap:18px; flex-wrap:wrap; justify-content:space-between;
     background:var(--ink); border-radius:12px; padding:22px 26px; margin-top:16px;}
@@ -186,7 +190,7 @@
         <tr><th>진행 구성</th><td>① PPT 발표(15분) → ② 라이브 시연(30분) → ③ QnA <span class="note" style="display:inline">· 총 약 50분 + 질의</span></td></tr>
         <tr><th>일정</th><td>
           <b>1차 — 7월 3일 (금) 오후 2시~3시</b> <span style="color:#B85C5C;font-weight:600;font-size:13px;">· 신청 마감</span><br>
-          <b>2차 — 7월 10일 (금) 오후 2시~3시</b> <span style="color:#2E8B57;font-weight:600;font-size:13px;">· 신청 접수 중</span>
+          <b>2차 — 7월 10일 (금) 오후 2시~3시</b> <span style="color:#B85C5C;font-weight:600;font-size:13px;">· 신청 마감</span>
         </td></tr>
         <tr><th>장소</th><td>글루타치온룸</td></tr>
         <tr><th>발표</th><td>임수용 (개발팀)</td></tr>
@@ -232,34 +236,13 @@
 
     <section>
       <h2><span class="num">6</span> 참석 수요조사</h2>
-      <div class="rsvp" id="rsvp">
-        <p class="guide">
-          세미나 수요조사를 위해 <b>참석 여부를 꼭 알려주세요.</b><br>
-          참석을 희망하시면 아래 정보를 입력해 주세요.<br>
-          <span style="display:inline-block;margin-top:8px;color:#B8860B;font-weight:600;">
-            ※ 1차(7월 3일)는 신청이 마감되었습니다. 지금 신청하시면 <b>2차 — 7월 10일 (금) 오후 2시</b> 세션으로 접수됩니다.
-          </span>
-        </p>
-        <div class="fields">
-          <div class="attend">
-            <label><input type="radio" name="attend" value="참석할게요" checked> 참석할게요</label>
-            <label><input type="radio" name="attend" value="다음에할게요"> 다음에할게요</label>
-          </div>
-          <div>
-            <label for="rsvp-team">팀 <span class="req">*</span></label>
-            <input type="text" id="rsvp-team" placeholder="예) 마케팅팀" autocomplete="off">
-          </div>
-          <div>
-            <label for="rsvp-name">이름 <span class="req">*</span></label>
-            <input type="text" id="rsvp-name" placeholder="예) 임수용" autocomplete="off">
-          </div>
-        </div>
-        <button class="submit" id="rsvp-submit" type="button">참석 의사 제출하기</button>
-        <p class="err" id="rsvp-err">팀과 이름을 모두 입력해 주세요.</p>
-        <div class="done">
-          <div class="ic">✅</div>
-          <div class="msg">제출이 완료되었습니다</div>
-          <div class="sub">참석 의사를 알려주셔서 감사합니다.</div>
+      <div class="rsvp closed">
+        <div class="ic">🔒</div>
+        <div class="msg">참가 신청이 마감되었습니다</div>
+        <div class="sub">
+          1차(7월 3일) · 2차(7월 10일) 모두 정원이 모두 차 신청을 마감했습니다.<br>
+          그동안 신청해 주신 분들께 감사드리며, 참석 확정 여부는 별도로 안내드리겠습니다.<br>
+          추가 신청은 어려운 점 양해 부탁드립니다 — 관심 있으신 분은 아래 슬랙 채널에서 다음 소식을 받아보실 수 있습니다.
         </div>
       </div>
 
@@ -285,51 +268,11 @@
 
 </div>
 
-<script>
-/* ─────────────────────────────────────────────────────────────
-   참석 수요조사 — 구글폼 연결 설정 (방법 B)
-   아래 3곳만 실제 구글폼 값으로 바꾸면 작동합니다.
-
-   [구글폼 값 얻는 법]
-   1) 구글폼을 만든다 (질문 3개: 팀 / 이름 / 참석여부)
-   2) 우상단 ⋮ → '미리 채우기 링크 가져오기'에서 각 칸에 아무 값이나 넣고
-      '링크 가져오기' → 생성된 URL의 entry.000000 숫자를 복사
-   3) 폼 주소창의 .../viewform 을 .../formResponse 로 바꾼 게 FORM_ACTION
-   ───────────────────────────────────────────────────────────── */
-var FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSfzhfqdTgdWZDYhjibPQ_gIBSn7QpUUYWov-XW-MsLSsat_wQ/formResponse";
-var ENTRY = {
-  attend: "entry.1623845680",  // 참석여부 (참석할게요 / 다음에할게요)
-  team:   "entry.1131101758",  // 팀명
-  name:   "entry.650001784"    // 이름
-};
-
-(function(){
-  var box = document.getElementById('rsvp');
-  var btn = document.getElementById('rsvp-submit');
-  var err = document.getElementById('rsvp-err');
-  var teamEl = document.getElementById('rsvp-team');
-  var nameEl = document.getElementById('rsvp-name');
-
-  btn.addEventListener('click', function(){
-    var team = teamEl.value.trim();
-    var name = nameEl.value.trim();
-    var attend = (document.querySelector('input[name=attend]:checked')||{}).value || '';
-
-    if(!team || !name){ err.style.display='block'; return; }
-    err.style.display='none';
-    btn.disabled = true; btn.textContent = '제출 중…';
-
-    var fd = new FormData();
-    fd.append(ENTRY.attend, attend);
-    fd.append(ENTRY.team, team);
-    fd.append(ENTRY.name, name);
-
-    // 구글폼은 CORS 응답을 막으므로 no-cors로 보내고 성공 처리한다.
-    fetch(FORM_ACTION, { method:'POST', mode:'no-cors', body:fd })
-      .then(function(){ box.classList.add('sent'); })
-      .catch(function(){ box.classList.add('sent'); }); // no-cors라 에러도 전송은 됨
-  });
-})();
-</script>
+<!--
+  참석 수요조사 폼은 정원 마감으로 비활성화(2026-07-01)했습니다.
+  재오픈 시 구글폼 연결 설정(방법 B) 참고용으로 보존:
+  FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSfzhfqdTgdWZDYhjibPQ_gIBSn7QpUUYWov-XW-MsLSsat_wQ/formResponse"
+  ENTRY = { attend: "entry.1623845680", team: "entry.1131101758", name: "entry.650001784" }
+-->
 </body>
 </html>

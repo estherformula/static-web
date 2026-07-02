@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>윈도우에서 클로드 코드 설치하는 법 — 완전 초보자 가이드</title>
+<style>
+  :root {
+    --ink: #24211d;
+    --muted: #6b6459;
+    --line: #e7e1d8;
+    --bg: #faf7f2;
+    --card: #ffffff;
+    --brand: #cc785c;
+    --brand-dark: #a85c43;
+    --brand-soft: #fbeee7;
+    --ok: #1f8a5b;
+    --ok-bg: #e8f6ee;
+    --warn: #b9770a;
+    --warn-bg: #fdf3e0;
+    --no: #c0392b;
+    --no-bg: #fce8e6;
+    --ps-blue: #012456;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 40px 20px 90px; }
+
+  header.hero {
+    background: linear-gradient(135deg, #cc785c 0%, #e0997a 100%);
+    color: #fff;
+    border-radius: 20px;
+    padding: 40px 36px 34px;
+    margin-bottom: 16px;
+    box-shadow: 0 10px 34px rgba(204,120,92,.25);
+  }
+  header.hero .eyebrow { font-size: 13px; letter-spacing: .08em; opacity: .9; text-transform: uppercase; margin: 0 0 12px; font-weight: 600; }
+  header.hero h1 { margin: 0 0 14px; font-size: 27px; line-height: 1.4; }
+  header.hero p { margin: 0; opacity: .95; font-size: 15px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .chip { background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.3); padding: 5px 13px; border-radius: 999px; font-size: 12.5px; }
+
+  .lead {
+    background: var(--brand-soft);
+    border-left: 4px solid var(--brand);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 20px 0 36px;
+    font-size: 15px;
+    color: #6e3d2c;
+  }
+  .lead b { color: var(--brand-dark); }
+
+  section { margin-bottom: 44px; }
+  h2 { font-size: 20px; margin: 0 0 8px; display: flex; align-items: center; gap: 10px; }
+  h2 .num {
+    background: var(--brand); color: #fff; font-size: 14px; font-weight: 700;
+    width: 30px; height: 30px; border-radius: 9px;
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+  }
+  h2 small { display: block; font-size: 13px; color: var(--muted); font-weight: 400; margin-top: 3px; }
+  .sub { color: var(--muted); font-size: 14.5px; margin: 0 0 18px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; box-shadow: 0 1px 2px rgba(20,30,45,.04); }
+  .card + .card { margin-top: 14px; }
+  .card h3 { margin: 0 0 8px; font-size: 15.5px; }
+  .card p { margin: 0; font-size: 14.5px; color: #45403a; }
+
+  /* checklist */
+  .checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .checklist li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; }
+  .checklist .dot { flex: none; width: 20px; height: 20px; border-radius: 6px; background: var(--ok-bg); color: var(--ok); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+
+  /* windows context menu mockup */
+  .winmenu-wrap { display: flex; justify-content: center; margin: 18px 0; }
+  .winmenu {
+    background: #2b2b2b; border-radius: 8px; padding: 6px; width: 260px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.35); font-size: 13px;
+  }
+  .winmenu .item { color: #ddd; padding: 9px 12px; border-radius: 4px; display: flex; align-items: center; gap: 10px; }
+  .winmenu .item .ic { width: 16px; text-align: center; opacity: .85; }
+  .winmenu .item.hot { background: #0d5ec4; color: #fff; font-weight: 600; position: relative; }
+  .winmenu .item.hot::after { content: "← 이걸 클릭!"; position: absolute; right: -108px; color: var(--brand-dark); font-weight: 700; font-size: 12px; white-space: nowrap; }
+  @media (max-width: 480px) { .winmenu .item.hot::after { content: ""; } }
+  .winmenu .divider { height: 1px; background: #444; margin: 4px 6px; }
+  .keycap-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 16px 0 4px; }
+  .keycap { background: #fff; border: 1px solid #cfc7ba; border-bottom-width: 3px; border-radius: 8px; padding: 8px 16px; font-weight: 700; font-size: 14px; color: var(--ink); box-shadow: 0 2px 0 rgba(0,0,0,.03); }
+  .keycap-plus { color: var(--muted); font-weight: 700; }
+
+  /* terminal mockup */
+  .terminal { border-radius: 12px; overflow: hidden; margin: 18px 0; box-shadow: 0 8px 24px rgba(20,20,20,.12); border: 1px solid #d8d2c6; }
+  .terminal .bar { background: #f1ede6; padding: 9px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ddd6c8; }
+  .terminal .bar .title { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #55504a; font-weight: 600; }
+  .terminal .bar .title .sq { width: 13px; height: 13px; border-radius: 3px; background: #4c7ee0; display: inline-block; }
+  .terminal .bar .wctl { display: flex; gap: 12px; color: #8a8478; font-size: 12px; }
+  .terminal .body { background: var(--ps-blue); color: #e8edf5; font-family: "SF Mono", "Cascadia Code", Consolas, Menlo, monospace; padding: 18px 20px; font-size: 13px; line-height: 1.9; overflow-x: auto; }
+  .terminal .body .ln { white-space: pre-wrap; word-break: break-all; }
+  .terminal .prompt { color: #6ee08a; }
+  .terminal .path { color: #9cc4ff; }
+  .terminal .cmd { color: #ffffff; font-weight: 600; }
+  .terminal .out { color: #b9c6da; }
+  .terminal .comment { color: #8fa0bd; font-style: italic; }
+  .terminal .cursor { display: inline-block; width: 7px; height: 14px; background: #e8edf5; vertical-align: middle; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* browser mockup */
+  .browser { border-radius: 12px; overflow: hidden; margin: 18px 0; border: 1px solid #d8d2c6; box-shadow: 0 8px 24px rgba(20,20,20,.1); }
+  .browser .bar { background: #eee9e1; padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #ddd6c8; }
+  .browser .dots { display: flex; gap: 6px; }
+  .browser .dots span { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .browser .dots span:nth-child(1) { background: #f04f4f; } .browser .dots span:nth-child(2) { background: #f2b53e; } .browser .dots span:nth-child(3) { background: #3ec96a; }
+  .browser .url { flex: 1; background: #fff; border: 1px solid #ddd6c8; border-radius: 999px; padding: 6px 14px; font-size: 12.5px; color: #55504a; font-family: monospace; }
+  .browser .body { background: #fff; padding: 34px 24px; text-align: center; }
+  .browser .body .logo { width: 46px; height: 46px; border-radius: 12px; background: var(--brand); display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 20px; margin-bottom: 14px; }
+  .browser .body h4 { margin: 0 0 6px; font-size: 16px; }
+  .browser .body p { margin: 0 0 18px; font-size: 13px; color: var(--muted); }
+  .browser .body .btn { display: inline-block; background: var(--brand); color: #fff; font-size: 13.5px; font-weight: 600; padding: 10px 26px; border-radius: 999px; }
+
+  .step-caption { font-size: 12.5px; color: var(--muted); text-align: center; margin-top: -8px; margin-bottom: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  th, td { text-align: left; padding: 12px 14px; vertical-align: top; border-bottom: 1px solid var(--line); }
+  th { background: #f5f1ea; color: #55504a; font-weight: 700; font-size: 12.5px; }
+  tr:last-child td { border-bottom: none; }
+  td code, p code, li code { background: #f1ede4; color: #a8462e; padding: 1px 6px; border-radius: 5px; font-family: "SF Mono", Consolas, Menlo, monospace; font-size: 12.5px; }
+
+  .tag { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .tag.ok { background: var(--ok-bg); color: var(--ok); }
+  .tag.warn { background: var(--warn-bg); color: var(--warn); }
+
+  .note {
+    display: flex; gap: 12px; align-items: flex-start;
+    border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 13.5px;
+  }
+  .note.info { background: var(--brand-soft); border: 1px solid #f0d5c8; color: #6e3d2c; }
+  .note.warn { background: var(--warn-bg); border: 1px solid #f3ddab; color: #7a5205; }
+  .note .ic { font-size: 17px; line-height: 1.3; }
+
+  .conclusion { background: #24211d; color: #f6f3ee; border-radius: 16px; padding: 26px 28px; }
+  .conclusion h2 { color: #fff; }
+  .conclusion h2 .num { background: #fff; color: #24211d; }
+  .conclusion p { margin: 8px 0 0; font-size: 14.5px; opacity: .92; }
+
+  footer { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  footer a { color: var(--brand-dark); }
+  .disclaimer { font-size: 12px; color: var(--muted); background: #fff; border: 1px dashed var(--line); border-radius: 10px; padding: 12px 16px; margin-top: 14px; }
+
+  @media (max-width: 600px) {
+    header.hero { padding: 28px 22px; }
+    header.hero h1 { font-size: 21px; }
+    .card { padding: 16px 18px; }
+    th, td { padding: 10px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">QNA · 클로드 코드 설치 가이드</p>
+    <h1>윈도우에서 클로드 코드(Claude Code) 설치하는 법</h1>
+    <p>컴퓨터에 클로드 관련 프로그램이 하나도 없는 상태에서 시작합니다. PowerShell을 열고, 설치하고, 원하는 폴더로 이동해서, 처음으로 실행해보는 과정까지 순서대로 따라오시면 됩니다.</p>
+    <div class="meta-row">
+      <span class="chip">🪟 Windows 10 / 11</span>
+      <span class="chip">⏱ 5분이면 충분</span>
+      <span class="chip">🧑‍💻 개발 지식 불필요</span>
+    </div>
+  </header>
+
+  <p class="lead">💡 <b>이런 분을 위한 글이에요.</b> "클로드 코드"라는 이름은 들어봤지만 컴퓨터를 켜서 어디서부터 눌러야 할지 모르는 분. 검은 화면(터미널)이 낯선 분. 이 글 순서대로만 따라 하면 설치부터 첫 대화까지 끝낼 수 있습니다.</p>
+
+  <section>
+    <h2><span class="num">0</span> 시작 전에 확인할 것</h2>
+    <p class="sub">아래 3가지만 확인되면 바로 시작할 수 있어요.</p>
+    <ul class="checklist">
+      <li><span class="dot">✓</span> <div><b>Windows 10(2018년 10월 업데이트 이후 버전) 또는 Windows 11</b> — 최근 몇 년 안에 산 PC라면 대부분 해당됩니다.</div></li>
+      <li><span class="dot">✓</span> <div><b>인터넷 연결</b> — 설치 파일을 내려받고 로그인할 때 필요해요.</div></li>
+      <li><span class="dot">✓</span> <div><b>Claude 계정</b> (또는 Claude Pro/Max 구독) — 없다면 로그인 단계에서 <code>claude.ai</code>로 이동해 바로 만들 수 있습니다.</div></li>
+    </ul>
+    <div class="note info"><span class="ic">✅</span><div><b>Node.js 같은 프로그램은 미리 설치할 필요가 없습니다.</b> 예전에는 개발자용 도구(Node.js)가 있어야 설치할 수 있었지만, 지금은 윈도우 전용 설치 프로그램이 알아서 필요한 걸 다 챙겨줍니다.</div></div>
+  </section>
+
+  <section>
+    <h2><span class="num">1</span> PowerShell 열기<small>클로드 코드는 "터미널"이라는 검은(또는 파란) 화면에서 명령어를 입력해 사용해요. 윈도우에서는 PowerShell이 그 역할을 합니다.</small></h2>
+
+    <div class="keycap-row">
+      <span class="keycap">⊞ Windows</span><span class="keycap-plus">+</span><span class="keycap">X</span>
+    </div>
+    <p class="step-caption">키보드에서 윈도우 키와 X를 동시에 누르세요</p>
+
+    <div class="winmenu-wrap">
+      <div class="winmenu">
+        <div class="item"><span class="ic">📁</span> 파일 탐색기</div>
+        <div class="item"><span class="ic">🔍</span> 검색</div>
+        <div class="divider"></div>
+        <div class="item hot"><span class="ic">💻</span> Windows PowerShell</div>
+        <div class="item"><span class="ic">⚙️</span> 설정</div>
+        <div class="item"><span class="ic">📊</span> 작업 관리자</div>
+      </div>
+    </div>
+    <p class="step-caption">화면 왼쪽 아래에 뜨는 메뉴에서 <b>"Windows PowerShell"</b>(또는 "터미널")을 클릭하세요</p>
+
+    <div class="card">
+      <h3>🔎 제대로 열렸는지 확인하는 법</h3>
+      <p>파란 배경(또는 검은 배경)의 창이 뜨고 <code>PS C:\Users\내이름&gt;</code> 처럼 앞에 <b>PS</b>가 붙어 있으면 PowerShell이 맞습니다. <b>PS</b>가 안 붙어 있으면 CMD라는 다른 창이니, 닫고 위 과정을 다시 해주세요.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> 설치 명령어 한 줄 붙여넣기</h2>
+    <p class="sub">아래 명령어를 <b>그대로 복사</b>해서 PowerShell 창에 <b>붙여넣고(우클릭 또는 Ctrl+V)</b> Enter를 누르세요.</p>
+
+    <div class="terminal">
+      <div class="bar">
+        <div class="title"><span class="sq"></span> Windows PowerShell</div>
+        <div class="wctl">— &nbsp; □ &nbsp; ×</div>
+      </div>
+      <div class="body">
+        <div class="ln"><span class="prompt">PS</span> <span class="path">C:\Users\내이름&gt;</span> <span class="cmd">irm https://claude.ai/install.ps1 | iex</span></div>
+        <div class="ln">&nbsp;</div>
+        <div class="ln comment"># 설치가 진행되는 동안 몇 줄의 진행 메시지가 나옵니다</div>
+        <div class="ln out">Downloading Claude Code...</div>
+        <div class="ln out">Installing... ████████████████████ 100%</div>
+        <div class="ln out">✔ Claude Code installed successfully</div>
+        <div class="ln"><span class="prompt">PS</span> <span class="path">C:\Users\내이름&gt;</span> <span class="cursor"></span></div>
+      </div>
+    </div>
+
+    <div class="note warn"><span class="ic">⚠️</span><div><b>설치 직후 "claude가 뭔지 모르겠다"는 오류가 나오면?</b> 정상입니다. PowerShell 창을 <b>완전히 닫고 1번 과정처럼 다시 열어주세요.</b> 방금 설치된 프로그램의 위치를 새 창이 다시 인식하는 과정이에요.</div></div>
+
+    <div class="card">
+      <h3>📌 이 명령어는 뭘 하는 건가요?</h3>
+      <p><code>irm</code>은 인터넷에서 설치 파일을 내려받고, <code>iex</code>는 그걸 바로 실행하라는 뜻이에요. 즉 "인터넷에서 클로드 코드 설치 프로그램을 받아서 바로 설치해줘"라는 한 줄짜리 명령입니다. 클로드를 만든 회사(Anthropic)의 공식 설치 주소(<code>claude.ai</code>)에서 내려받기 때문에 안전합니다.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> 작업할 폴더로 이동하기<small>클로드 코드는 "지금 열려 있는 폴더"를 기준으로 파일을 읽고 작업합니다. 원하는 프로젝트 폴더로 먼저 이동해야 해요.</small></h2>
+
+    <div class="card">
+      <h3>📁 <code>cd</code> 명령어 — 폴더 이동하기</h3>
+      <p><code>cd</code>는 "change directory(폴더 바꾸기)"의 줄임말이에요. <code>cd</code> 뒤에 이동하고 싶은 폴더 경로를 적어주면 됩니다.</p>
+    </div>
+
+    <div class="terminal">
+      <div class="bar">
+        <div class="title"><span class="sq"></span> Windows PowerShell</div>
+        <div class="wctl">— &nbsp; □ &nbsp; ×</div>
+      </div>
+      <div class="body">
+        <div class="ln comment"># 예시 1) 문서 폴더 안의 "MyProject" 폴더로 이동</div>
+        <div class="ln"><span class="prompt">PS</span> <span class="path">C:\Users\내이름&gt;</span> <span class="cmd">cd C:\Users\내이름\Documents\MyProject</span></div>
+        <div class="ln">&nbsp;</div>
+        <div class="ln comment"># 예시 2) 바탕화면으로 이동</div>
+        <div class="ln"><span class="prompt">PS</span> <span class="path">C:\Users\내이름&gt;</span> <span class="cmd">cd $env:USERPROFILE\Desktop</span></div>
+        <div class="ln">&nbsp;</div>
+        <div class="ln comment"># 지금 폴더 안에 어떤 파일/폴더가 있는지 보기</div>
+        <div class="ln"><span class="prompt">PS</span> <span class="path">C:\Users\내이름\Desktop&gt;</span> <span class="cmd">ls</span></div>
+        <div class="ln"><span class="prompt">PS</span> <span class="path">C:\Users\내이름\Desktop&gt;</span> <span class="cursor"></span></div>
+      </div>
+    </div>
+
+    <table>
+      <tr><th>하고 싶은 것</th><th>입력할 명령어</th></tr>
+      <tr><td>특정 경로로 바로 이동</td><td><code>cd C:\Users\내이름\Documents\폴더이름</code></td></tr>
+      <tr><td>바탕화면으로 이동</td><td><code>cd $env:USERPROFILE\Desktop</code></td></tr>
+      <tr><td>한 단계 위 폴더로 이동</td><td><code>cd ..</code></td></tr>
+      <tr><td>지금 폴더의 파일 목록 보기</td><td><code>ls</code></td></tr>
+      <tr><td>새 폴더 만들고 그 안으로 이동</td><td><code>mkdir 새폴더 ; cd 새폴더</code></td></tr>
+    </table>
+
+    <div class="note info"><span class="ic">💬</span><div>경로를 직접 입력하기 번거롭다면, <b>파일 탐색기에서 원하는 폴더를 열어둔 뒤 주소창의 경로를 복사</b>해서 <code>cd "복사한경로"</code> 형태로 붙여넣어도 됩니다. 경로에 띄어쓰기가 있으면 꼭 큰따옴표로 감싸주세요.</div></div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> 클로드 코드 첫 실행 &amp; 로그인</h2>
+
+    <div class="terminal">
+      <div class="bar">
+        <div class="title"><span class="sq"></span> Windows PowerShell</div>
+        <div class="wctl">— &nbsp; □ &nbsp; ×</div>
+      </div>
+      <div class="body">
+        <div class="ln"><span class="prompt">PS</span> <span class="path">C:\Users\내이름\Documents\MyProject&gt;</span> <span class="cmd">claude</span></div>
+        <div class="ln">&nbsp;</div>
+        <div class="ln out">브라우저를 열어 로그인해주세요...</div>
+        <div class="ln out">(자동으로 안 열리면 'c'를 눌러 링크를 복사하세요)</div>
+      </div>
+    </div>
+    <p class="step-caption">원하는 폴더로 이동한 상태에서 <code>claude</code>만 입력하고 Enter</p>
+
+    <div class="browser">
+      <div class="bar">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="url">🔒 claude.ai/login</div>
+      </div>
+      <div class="body">
+        <div class="logo">C</div>
+        <h4>Claude 계정으로 로그인</h4>
+        <p>이메일 또는 Google 계정으로 계속하기</p>
+        <div class="btn">계속하기 →</div>
+      </div>
+    </div>
+    <p class="step-caption">자동으로 열린 브라우저 창에서 평소 쓰던 Claude 계정으로 로그인하면 끝!</p>
+
+    <div class="card">
+      <h3>✅ 로그인 후에는?</h3>
+      <p>브라우저에서 로그인이 끝나면 PowerShell 창으로 자동으로 돌아오면서 클로드 코드 화면이 나타납니다. 로그인 정보는 내 컴퓨터에 안전하게 저장되므로, <b>다음부터는 로그인 없이 바로</b> <code>claude</code>만 입력하면 됩니다.</p>
+    </div>
+    <div class="card">
+      <h3>💬 이제 뭘 하면 되나요?</h3>
+      <p>화면에 커서가 깜빡이면 바로 궁금한 걸 한글로 입력하면 됩니다. 예: <code>이 폴더에 있는 파일들 정리해줘</code>. 사용 가능한 기능이 궁금하면 <code>/help</code>를 입력해보세요.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> 자주 만나는 오류, 이렇게 해결하세요</h2>
+    <table>
+      <tr><th style="width:34%">이런 메시지가 떠요</th><th style="width:30%">원인</th><th>해결 방법</th></tr>
+      <tr>
+        <td><code>'claude' is not recognized</code> <span class="tag warn">흔함</span></td>
+        <td>설치 직후라 창이 새 프로그램 위치를 아직 모름</td>
+        <td>PowerShell 창을 <b>완전히 닫고</b> 1번 과정처럼 다시 열기</td>
+      </tr>
+      <tr>
+        <td><code>'irm' is not recognized</code></td>
+        <td>PowerShell이 아니라 CMD(검은 창)에서 실행함</td>
+        <td>창을 닫고 <code>Win+X</code>로 <b>PowerShell</b>을 다시 열어서 시도</td>
+      </tr>
+      <tr>
+        <td>설치 중 SSL/TLS 관련 오류</td>
+        <td>오래된 Windows 10 보안 설정</td>
+        <td>설치 전에 <code>[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12</code> 입력 후 재시도</td>
+      </tr>
+      <tr>
+        <td>이상한 <code>&lt;</code> 기호 섞인 에러 / 웹페이지 내용이 출력됨</td>
+        <td>일시적인 네트워크·지역 접속 문제</td>
+        <td>같은 명령어 재시도. 계속되면 <code>winget install Anthropic.ClaudeCode</code>로 설치 시도</td>
+      </tr>
+      <tr>
+        <td>화면에 6자리 코드만 뜨고 브라우저가 안 열림</td>
+        <td>원격/특수 환경에서 자동 연동이 안 되는 경우</td>
+        <td>표시된 코드를 그대로 복사해 터미널에 붙여넣기</td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> 한눈에 보는 전체 순서</h2>
+    <ul class="checklist">
+      <li><span class="dot">1</span> <div><code>Win + X</code> → <b>Windows PowerShell</b> 클릭</div></li>
+      <li><span class="dot">2</span> <div><code>irm https://claude.ai/install.ps1 | iex</code> 붙여넣고 Enter</div></li>
+      <li><span class="dot">3</span> 창을 닫았다 다시 열기 (첫 설치 시에만)</li>
+      <li><span class="dot">4</span> <div><code>cd 원하는폴더경로</code>로 작업할 폴더 이동</div></li>
+      <li><span class="dot">5</span> <div><code>claude</code> 입력 → 브라우저에서 로그인</div></li>
+      <li><span class="dot">6</span> <div>궁금한 걸 한글로 물어보며 사용 시작!</div></li>
+    </ul>
+  </section>
+
+  <div class="conclusion">
+    <h2><span class="num">✓</span> 결론</h2>
+    <p>윈도우에 개발 도구가 하나도 없어도 괜찮습니다. PowerShell을 열고, 설치 명령어 한 줄을 붙여넣고, 원하는 폴더로 이동한 뒤 <code>claude</code>라고 치고 로그인만 하면 준비 끝입니다. 전체 과정은 5분이면 충분합니다.</p>
+  </div>
+
+  <footer>
+    <p>참고: Claude Code 공식 문서 (code.claude.com/docs) — 설치·터미널 사용법·인증 안내 페이지, 2026년 7월 기준.</p>
+    <div class="disclaimer">이 문서는 클로드 코드를 처음 접하는 사내 구성원을 위한 QNA 자료입니다. 설치 화면의 세부 디자인은 버전 업데이트에 따라 달라질 수 있습니다.</div>
+  </footer>
+
+</div>
+</body>
+</html>

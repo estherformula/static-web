@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>구글드라이브의 파일로 클로드 코드 활용하기 — 안전하게 쓰는 법</title>
+<style>
+  :root {
+    --ink: #24211d;
+    --muted: #6b6459;
+    --line: #e7e1d8;
+    --bg: #faf7f2;
+    --card: #ffffff;
+    --brand: #cc785c;
+    --brand-dark: #a85c43;
+    --brand-soft: #fbeee7;
+    --ok: #1f8a5b;
+    --ok-bg: #e8f6ee;
+    --warn: #b9770a;
+    --warn-bg: #fdf3e0;
+    --no: #c0392b;
+    --no-bg: #fce8e6;
+    --blue: #2f6fa8;
+    --blue-bg: #eaf2fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 800px; margin: 0 auto; padding: 40px 20px 90px; }
+
+  header.hero {
+    background: linear-gradient(135deg, #cc785c 0%, #e0997a 100%);
+    color: #fff;
+    border-radius: 20px;
+    padding: 40px 36px 34px;
+    margin-bottom: 16px;
+    box-shadow: 0 10px 34px rgba(204,120,92,.25);
+  }
+  header.hero .eyebrow { font-size: 13px; letter-spacing: .08em; opacity: .9; text-transform: uppercase; margin: 0 0 12px; font-weight: 600; }
+  header.hero h1 { margin: 0 0 14px; font-size: 26px; line-height: 1.4; }
+  header.hero p { margin: 0; opacity: .95; font-size: 15px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .chip { background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.3); padding: 5px 13px; border-radius: 999px; font-size: 12.5px; }
+
+  .verdict-banner {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--ok-bg); border: 1px solid #bfe6cf; border-radius: 14px;
+    padding: 18px 22px; margin: 20px 0 36px;
+  }
+  .verdict-banner .ic { font-size: 24px; line-height: 1.3; }
+  .verdict-banner b { color: var(--ok); display: block; margin-bottom: 4px; font-size: 15.5px; }
+  .verdict-banner p { margin: 0; font-size: 14px; color: #234b3a; }
+
+  section { margin-bottom: 44px; }
+  h2 { font-size: 20px; margin: 0 0 8px; display: flex; align-items: center; gap: 10px; }
+  h2 .num {
+    background: var(--brand); color: #fff; font-size: 14px; font-weight: 700;
+    width: 30px; height: 30px; border-radius: 9px;
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+  }
+  h2 small { display: block; font-size: 13px; color: var(--muted); font-weight: 400; margin-top: 3px; }
+  .sub { color: var(--muted); font-size: 14.5px; margin: 0 0 18px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; box-shadow: 0 1px 2px rgba(20,30,45,.04); }
+  .card + .card { margin-top: 14px; }
+  .card h3 { margin: 0 0 8px; font-size: 15.5px; display: flex; align-items: center; gap: 8px; }
+  .card p { margin: 0; font-size: 14.5px; color: #45403a; }
+  .card ul { margin: 8px 0 0; padding-left: 18px; font-size: 14px; color: #45403a; }
+  .card li { margin-bottom: 4px; }
+
+  /* 두 모드 비교 카드 */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+  @media (max-width: 620px) { .compare-grid { grid-template-columns: 1fr; } }
+  .compare-card { border-radius: 14px; padding: 18px 20px; border: 1.5px solid var(--line); }
+  .compare-card.risky { border-color: #f3c9a8; background: #fff8f3; }
+  .compare-card.safe { border-color: #bfe6cf; background: #f4fbf7; }
+  .compare-card .badge { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; }
+  .compare-card.risky .badge { background: var(--warn-bg); color: var(--warn); }
+  .compare-card.safe .badge { background: var(--ok-bg); color: var(--ok); }
+  .compare-card h4 { margin: 0 0 8px; font-size: 15px; }
+  .compare-card p { margin: 0 0 8px; font-size: 13.5px; color: #45403a; }
+  .compare-card ul { margin: 0; padding-left: 16px; font-size: 13px; color: #57524a; }
+  .compare-card li { margin-bottom: 3px; }
+
+  /* 드라이브 아이콘 다이어그램 */
+  .diagram { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+  .diagram .box { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; text-align: center; font-size: 12.5px; min-width: 108px; }
+  .diagram .box .emoji { font-size: 26px; display: block; margin-bottom: 6px; }
+  .diagram .arrow { color: var(--muted); font-size: 20px; }
+  .diagram .box.cloud { background: var(--blue-bg); border-color: #c5dbee; }
+  .diagram .box.local { background: var(--ok-bg); border-color: #bfe6cf; }
+
+  .risk-list { display: grid; gap: 12px; margin: 16px 0; }
+  .risk-item { display: flex; gap: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 20px; }
+  .risk-item .ic { font-size: 22px; flex: none; width: 34px; text-align: center; }
+  .risk-item h4 { margin: 0 0 4px; font-size: 14.5px; }
+  .risk-item p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .risk-item .sev { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
+  .sev.high { background: var(--no-bg); color: var(--no); }
+  .sev.mid { background: var(--warn-bg); color: var(--warn); }
+
+  .checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .checklist li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; }
+  .checklist .dot { flex: none; width: 20px; height: 20px; border-radius: 6px; background: var(--ok-bg); color: var(--ok); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  th, td { text-align: left; padding: 12px 14px; vertical-align: top; border-bottom: 1px solid var(--line); }
+  th { background: #f5f1ea; color: #55504a; font-weight: 700; font-size: 12.5px; }
+  tr:last-child td { border-bottom: none; }
+  td code, p code, li code { background: #f1ede4; color: #a8462e; padding: 1px 6px; border-radius: 5px; font-family: "SF Mono", Consolas, Menlo, monospace; font-size: 12.5px; }
+
+  .tag { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .tag.ok { background: var(--ok-bg); color: var(--ok); }
+  .tag.warn { background: var(--warn-bg); color: var(--warn); }
+  .tag.no { background: var(--no-bg); color: var(--no); }
+
+  .note { display: flex; gap: 12px; align-items: flex-start; border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 13.5px; }
+  .note.info { background: var(--brand-soft); border: 1px solid #f0d5c8; color: #6e3d2c; }
+  .note.warn { background: var(--warn-bg); border: 1px solid #f3ddab; color: #7a5205; }
+  .note.official { background: var(--blue-bg); border: 1px solid #c5dbee; color: #1d4e77; }
+  .note .ic { font-size: 17px; line-height: 1.3; }
+
+  .conclusion { background: #24211d; color: #f6f3ee; border-radius: 16px; padding: 26px 28px; }
+  .conclusion h2 { color: #fff; }
+  .conclusion h2 .num { background: #fff; color: #24211d; }
+  .conclusion p { margin: 8px 0 0; font-size: 14.5px; opacity: .92; }
+  .conclusion ul { margin: 10px 0 0; padding-left: 18px; font-size: 14px; opacity: .95; }
+  .conclusion li { margin-bottom: 4px; }
+
+  footer { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); background: #fff; border: 1px dashed var(--line); border-radius: 10px; padding: 12px 16px; margin-top: 14px; }
+
+  @media (max-width: 600px) {
+    header.hero { padding: 28px 22px; }
+    header.hero h1 { font-size: 20px; }
+    .card { padding: 16px 18px; }
+    th, td { padding: 10px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">QNA · 클로드 코드 활용 가이드</p>
+    <h1>구글드라이브의 파일로 클로드 코드 활용하기</h1>
+    <p>구글드라이브 데스크톱 앱을 설치하면 내 컴퓨터에 가상 드라이브(예: G:)로 잡히죠. 이 폴더 안에서 클로드 코드를 써도 괜찮을까요? 결론부터, 그리고 왜 그런지, 안전하게 쓰는 방법까지 정리했습니다.</p>
+    <div class="meta-row">
+      <span class="chip">☁️ 구글드라이브 데스크톱</span>
+      <span class="chip">⚠️ 주의사항 포함</span>
+      <span class="chip">✅ 안전 사용법 체크리스트</span>
+    </div>
+  </header>
+
+  <div class="verdict-banner">
+    <span class="ic">✅</span>
+    <div><b>결론: 사용해도 됩니다. 단, 몇 가지는 꼭 알고 쓰세요.</b>
+    <p>문서 정리, 메모 작업, 가벼운 파일 편집 정도는 큰 문제 없이 쓸 수 있습니다. 다만 <b>실제 코드 프로젝트(특히 git 저장소)</b>를 구글드라이브 폴더 안에 두고 클로드 코드로 작업하는 건 권장하지 않습니다. 아래에서 이유와 대안을 자세히 설명합니다.</p></div>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> 구글드라이브 폴더는 "진짜 내 컴퓨터 파일"이 아닐 수 있어요<small>이 차이를 이해해야 왜 문제가 생기는지 알 수 있습니다.</small></h2>
+
+    <div class="diagram">
+      <div class="box cloud"><span class="emoji">☁️</span>구글 클라우드<br>(원본 파일)</div>
+      <div class="arrow">⇄</div>
+      <div class="box"><span class="emoji">💻</span>내 컴퓨터의<br>"G: 드라이브"</div>
+      <div class="arrow">⇄</div>
+      <div class="box"><span class="emoji">🤖</span>클로드 코드가<br>읽고 쓰는 파일</div>
+    </div>
+
+    <p class="sub">구글드라이브 데스크톱 앱은 기본적으로 <b>"스트리밍" 방식</b>으로 동작합니다. 폴더 안에 파일이 다 있는 것처럼 보이지만, 실제로는 <b>필요할 때만 클라우드에서 내려받는 구조</b>예요. 즉 내가 파일을 열거나 프로그램이 그 파일을 읽으려는 순간에야 실제로 다운로드가 일어납니다.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card risky">
+        <span class="badge">기본값</span>
+        <h4>☁️ 스트리밍 모드</h4>
+        <p>파일이 클라우드에만 있고, 열 때마다 그때그때 내려받음</p>
+        <ul>
+          <li>평소 문서 몇 개 열어보는 정도면 문제없음</li>
+          <li>클로드 코드가 <b>폴더 전체를 훑어야 하는 작업</b>(전체 검색·전체 스캔)을 하면 수십~수백 개 파일을 한꺼번에 내려받게 돼 느려짐</li>
+        </ul>
+      </div>
+      <div class="compare-card safe">
+        <span class="badge">설정으로 변경 가능</span>
+        <h4>💾 오프라인 사용(미러링) 모드</h4>
+        <p>지정한 폴더를 통째로 내 컴퓨터에 실제 복사본으로 저장</p>
+        <ul>
+          <li>파일이 항상 로컬에 실제로 존재 → 읽기/쓰기 속도가 일반 폴더와 비슷</li>
+          <li>클로드 코드로 작업할 폴더는 <b>이 모드로 바꾸는 걸 추천</b></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note info"><span class="ic">💡</span><div>구글드라이브 앱에서 해당 폴더를 우클릭 → <b>"오프라인으로 사용 가능하게 설정"</b>(또는 환경설정에서 "내 드라이브 동기화" 옵션)을 켜면 미러링 모드로 바뀝니다.</div></div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> 실제로 어떤 문제가 생길 수 있나요</h2>
+    <div class="risk-list">
+      <div class="risk-item">
+        <span class="ic">🐢</span>
+        <div><h4>속도 저하 <span class="sev mid">중간</span></h4>
+        <p>클로드 코드가 여러 파일을 한 번에 읽거나 검색할 때, 스트리밍 모드에서는 그때마다 클라우드에서 내려받아야 해서 로컬 폴더보다 눈에 띄게 느려질 수 있습니다.</p></div>
+      </div>
+      <div class="risk-item">
+        <span class="ic">🔀</span>
+        <div><h4>동기화 충돌로 "충돌 사본" 파일 생성 <span class="sev high">높음</span></h4>
+        <p>클로드 코드가 짧은 시간 안에 같은 파일을 여러 번 저장하면, 구글드라이브의 클라우드 업로드 속도가 못 따라가면서 <code>파일명 (사용자 이름의 충돌 사본 2026-07-02)</code> 같은 중복 파일이 생길 수 있습니다. 어떤 버전이 최신인지 헷갈리게 돼요.</p></div>
+      </div>
+      <div class="risk-item">
+        <span class="ic">🗂️</span>
+        <div><h4>git 저장소(.git 폴더) 손상 위험 <span class="sev high">높음</span></h4>
+        <p>코드 프로젝트를 git으로 관리 중이라면 <code>.git</code> 폴더 안에 수천 개의 작은 파일이 있습니다. 이걸 클라우드 동기화하면 동기화가 매우 느려지고, 동기화 도중 파일이 바뀌면서 저장소 자체가 깨질 위험이 있습니다. (이건 구글드라이브만의 문제가 아니라 Dropbox 등 모든 클라우드 동기화 폴더에서 업계 전반적으로 알려진 주의사항입니다.)</p></div>
+      </div>
+      <div class="risk-item">
+        <span class="ic">🔑</span>
+        <div><h4>민감한 정보가 클라우드에 자동 업로드 <span class="sev mid">중간</span></h4>
+        <p>API 키, 비밀번호, 사내 문서 등이 담긴 파일이 구글드라이브 폴더 안에 있으면, 별도 조치 없이는 <b>자동으로 구글 클라우드에 업로드</b>됩니다. 사내 보안 규정상 외부 업로드가 제한된 파일은 애초에 구글드라이브 폴더 밖에 두세요.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> 안전하게 사용하는 방법</h2>
+    <ul class="checklist">
+      <li><span class="dot">1</span> <div>클로드 코드로 작업할 폴더는 <b>"오프라인 사용" (미러링) 모드</b>로 설정해서, 실제 로컬 복사본이 항상 존재하게 만드세요.</div></li>
+      <li><span class="dot">2</span> <div><b>git 저장소(실제 개발 프로젝트)</b>는 구글드라이브 폴더 밖(예: <code>C:\Users\내이름\Projects</code>)에 두고 작업하세요. 완료된 결과물(문서·리포트 등)만 구글드라이브로 복사해 공유하는 방식을 추천합니다.</div></li>
+      <li><span class="dot">3</span> <div>클로드 코드로 <b>여러 파일을 한꺼번에 수정하는 작업</b>을 할 때는, 작업이 끝난 뒤 구글드라이브 우측 하단 아이콘을 눌러 <b>동기화가 완료됐는지("모든 변경사항이 Drive에 저장됨")</b> 확인하는 습관을 들이세요.</div></li>
+      <li><span class="dot">4</span> <div>파일명에 <code>(충돌 사본)</code>이 붙은 파일이 보이면, 어떤 버전이 최신인지 확인 후 정리하세요.</div></li>
+      <li><span class="dot">5</span> <div>API 키·비밀번호·사내 기밀 문서는 구글드라이브 동기화 폴더 밖에 별도로 보관하세요.</div></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> 어떤 작업엔 괜찮고, 어떤 작업엔 피해야 할까</h2>
+    <table>
+      <tr><th>작업 유형</th><th>구글드라이브에서 해도 될까?</th></tr>
+      <tr><td>기획서·회의록 같은 문서(.md, .txt, .docx) 정리·요약</td><td><span class="tag ok">문제없음</span></td></tr>
+      <tr><td>HTML 리포트, 이미지 등 결과물 생성·저장</td><td><span class="tag ok">문제없음</span></td></tr>
+      <tr><td>엑셀/CSV 데이터 몇 개 파일을 읽고 분석</td><td><span class="tag ok">대체로 문제없음</span></td></tr>
+      <tr><td>수십~수백 개 파일이 있는 폴더 전체를 검색·스캔하는 작업</td><td><span class="tag warn">가능하지만 느릴 수 있음 · 미러링 모드 권장</span></td></tr>
+      <tr><td>git으로 관리되는 실제 코드 프로젝트 개발</td><td><span class="tag no">비권장 · 로컬 디스크에서 작업</span></td></tr>
+      <tr><td>API 키·비밀번호 등 민감정보가 포함된 파일 작업</td><td><span class="tag no">비권장 · 동기화 폴더 밖에서</span></td></tr>
+    </table>
+  </section>
+
+  <div class="note official"><span class="ic">📄</span><div><b>참고:</b> 클로드 코드 공식 문서(code.claude.com/docs)에는 구글드라이브·원드라이브 같은 클라우드 동기화 폴더에서의 사용에 대한 별도 안내가 없습니다. 즉 "공식적으로 금지"도 "공식적으로 보장"도 아닌, <b>문서화되지 않은 영역</b>입니다. 위 내용은 구글드라이브의 동작 방식과 git·클라우드 동기화 폴더 조합에서 업계에 널리 알려진 주의사항을 바탕으로 정리한 것입니다.</div></div>
+
+  <div class="conclusion">
+    <h2><span class="num">✓</span> 결론</h2>
+    <p>구글드라이브 폴더에서 클로드 코드를 쓰는 건 가능하고, 문서·리포트 작업 수준이라면 크게 걱정할 필요 없습니다. 다만:</p>
+    <ul>
+      <li>큰 폴더를 통째로 다루거나 자주 저장하는 작업이라면 <b>미러링(오프라인 사용) 모드</b>로 바꿔두세요.</li>
+      <li><b>git 프로젝트는 로컬 디스크</b>에서 작업하는 걸 권장합니다.</li>
+      <li>민감정보 파일은 애초에 동기화 폴더 밖에 두세요.</li>
+    </ul>
+  </div>
+
+  <footer>
+    <p>참고: Claude Code 공식 문서 (code.claude.com/docs) — 해당 시나리오에 대한 공식 언급 없음 확인, 2026년 7월 기준. 구글드라이브 스트리밍/미러링 동작 방식은 Google Drive 데스크톱 앱 공개 기능 설명 기준.</p>
+    <div class="disclaimer">이 문서는 사내 QNA 참고용으로, 일반적으로 알려진 클라우드 동기화 폴더 사용 시 주의사항을 바탕으로 작성되었습니다. 회사 보안 정책상 별도 규정이 있다면 그 규정이 우선합니다.</div>
+  </footer>
+
+</div>
+</body>
+</html>

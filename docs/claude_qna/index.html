@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>클로드 코드 QNA 모음</title>
+<style>
+  :root {
+    --ink: #24211d;
+    --muted: #6b6459;
+    --line: #e7e1d8;
+    --bg: #faf7f2;
+    --card: #ffffff;
+    --brand: #cc785c;
+    --brand-dark: #a85c43;
+    --brand-soft: #fbeee7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 40px 20px 90px; }
+
+  header.hero {
+    background: linear-gradient(135deg, #cc785c 0%, #e0997a 100%);
+    color: #fff;
+    border-radius: 20px;
+    padding: 40px 36px 34px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 34px rgba(204,120,92,.25);
+  }
+  header.hero .eyebrow { font-size: 13px; letter-spacing: .08em; opacity: .9; text-transform: uppercase; margin: 0 0 12px; font-weight: 600; }
+  header.hero h1 { margin: 0 0 14px; font-size: 27px; line-height: 1.4; }
+  header.hero p { margin: 0; opacity: .95; font-size: 15px; }
+
+  .list { display: grid; gap: 14px; }
+  .item {
+    display: flex; gap: 16px; align-items: flex-start;
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px 22px; text-decoration: none; color: inherit;
+    box-shadow: 0 1px 2px rgba(20,30,45,.04);
+    transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+  }
+  .item:hover { box-shadow: 0 10px 26px rgba(204,120,92,.16); border-color: #f0d5c8; transform: translateY(-1px); }
+  .item .ic {
+    flex: none; width: 46px; height: 46px; border-radius: 12px;
+    background: var(--brand-soft); display: flex; align-items: center; justify-content: center;
+    font-size: 21px;
+  }
+  .item .content { flex: 1; min-width: 0; }
+  .item h2 { margin: 0 0 6px; font-size: 16.5px; color: var(--ink); }
+  .item p { margin: 0 0 10px; font-size: 13.5px; color: var(--muted); }
+  .item .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: #f5f1ea; color: #7a7469; }
+  .item .go { flex: none; align-self: center; color: var(--brand-dark); font-size: 18px; opacity: .6; }
+  .item:hover .go { opacity: 1; }
+
+  footer { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); text-align: center; }
+  footer a { color: var(--brand-dark); }
+
+  @media (max-width: 600px) {
+    header.hero { padding: 28px 22px; }
+    header.hero h1 { font-size: 22px; }
+    .item { padding: 16px 18px; gap: 12px; }
+    .item .ic { width: 38px; height: 38px; font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">Claude Code QNA</p>
+    <h1>클로드 코드 QNA 모음</h1>
+    <p>클로드 코드를 사용하면서 자주 나오는 질문들을 비개발자도 이해하기 쉽게 정리했습니다.</p>
+  </header>
+
+  <div class="list">
+
+    <a class="item" href="windows-claude-code-install.html">
+      <div class="ic">🪟</div>
+      <div class="content">
+        <h2>윈도우에서 클로드 코드 설치하는 법</h2>
+        <p>클로드가 하나도 안 깔린 윈도우 PC에서 PowerShell 열기부터 설치, 폴더 이동, 첫 실행/로그인까지 순서대로.</p>
+        <div class="tags"><span class="tag">설치</span><span class="tag">윈도우</span><span class="tag">PowerShell</span></div>
+      </div>
+      <div class="go">›</div>
+    </a>
+
+    <a class="item" href="google-drive-claude-code-usage.html">
+      <div class="ic">☁️</div>
+      <div class="content">
+        <h2>구글드라이브의 파일로 클로드 코드 활용하기</h2>
+        <p>구글드라이브 데스크톱 앱으로 잡히는 가상 드라이브에서 클로드 코드를 써도 되는지, 안전하게 쓰는 법과 주의사항.</p>
+        <div class="tags"><span class="tag">파일 관리</span><span class="tag">구글드라이브</span><span class="tag">주의사항</span></div>
+      </div>
+      <div class="go">›</div>
+    </a>
+
+    <a class="item" href="google-sheets-collaboration-claude-code.html">
+      <div class="ic">📊</div>
+      <div class="content">
+        <h2>공동작업하는 구글 스프레드시트를 클로드로 작업하는 방법</h2>
+        <p>동료들과 실시간으로 같이 쓰는 구글 시트를 클로드로 정리·분석하는 기본 흐름과 협업 중 조심할 점.</p>
+        <div class="tags"><span class="tag">협업 툴</span><span class="tag">구글시트</span><span class="tag">데이터 정리</span></div>
+      </div>
+      <div class="go">›</div>
+    </a>
+
+  </div>
+
+  <footer>클로드코드-세미나 · 사내 QNA 자료</footer>
+
+</div>
+</body>
+</html>

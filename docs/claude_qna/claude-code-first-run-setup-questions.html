@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>클로드 코드 처음 실행하면 뜨는 질문들, 뭐라고 답해야 하나요?</title>
+<style>
+  :root {
+    --ink: #24211d;
+    --muted: #6b6459;
+    --line: #e7e1d8;
+    --bg: #faf7f2;
+    --card: #ffffff;
+    --brand: #cc785c;
+    --brand-dark: #a85c43;
+    --brand-soft: #fbeee7;
+    --ok: #1f8a5b;
+    --ok-bg: #e8f6ee;
+    --warn: #b9770a;
+    --warn-bg: #fdf3e0;
+    --no: #c0392b;
+    --no-bg: #fce8e6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 40px 20px 90px; }
+
+  header.hero {
+    background: linear-gradient(135deg, #cc785c 0%, #e0997a 100%);
+    color: #fff;
+    border-radius: 20px;
+    padding: 40px 36px 34px;
+    margin-bottom: 16px;
+    box-shadow: 0 10px 34px rgba(204,120,92,.25);
+  }
+  header.hero .eyebrow { font-size: 13px; letter-spacing: .08em; opacity: .9; text-transform: uppercase; margin: 0 0 12px; font-weight: 600; }
+  header.hero h1 { margin: 0 0 14px; font-size: 26px; line-height: 1.4; }
+  header.hero p { margin: 0; opacity: .95; font-size: 15px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .chip { background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.3); padding: 5px 13px; border-radius: 999px; font-size: 12.5px; }
+
+  .lead {
+    background: var(--brand-soft);
+    border-left: 4px solid var(--brand);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 20px 0 36px;
+    font-size: 15px;
+    color: #6e3d2c;
+  }
+  .lead b { color: var(--brand-dark); }
+
+  section { margin-bottom: 44px; }
+  h2 { font-size: 20px; margin: 0 0 8px; display: flex; align-items: center; gap: 10px; }
+  h2 .num {
+    background: var(--brand); color: #fff; font-size: 14px; font-weight: 700;
+    width: 30px; height: 30px; border-radius: 9px;
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+  }
+  h2 small { display: block; font-size: 13px; color: var(--muted); font-weight: 400; margin-top: 3px; }
+  .sub { color: var(--muted); font-size: 14.5px; margin: 0 0 18px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; box-shadow: 0 1px 2px rgba(20,30,45,.04); }
+  .card + .card { margin-top: 14px; }
+  .card h3 { margin: 0 0 8px; font-size: 15.5px; }
+  .card p { margin: 0; font-size: 14.5px; color: #45403a; }
+  .card p + p { margin-top: 8px; }
+
+  .checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .checklist li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; }
+  .checklist .dot { flex: none; width: 20px; height: 20px; border-radius: 6px; background: var(--ok-bg); color: var(--ok); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+
+  /* terminal mockup */
+  .terminal { border-radius: 12px; overflow: hidden; margin: 18px 0; box-shadow: 0 8px 24px rgba(20,20,20,.12); border: 1px solid #d8d2c6; }
+  .terminal .bar { background: #f1ede6; padding: 9px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ddd6c8; }
+  .terminal .bar .title { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #55504a; font-weight: 600; }
+  .terminal .bar .title .sq { width: 13px; height: 13px; border-radius: 3px; background: #4c7ee0; display: inline-block; }
+  .terminal .bar .wctl { display: flex; gap: 12px; color: #8a8478; font-size: 12px; }
+  .terminal .body { background: #1c1b1a; color: #e8e5df; font-family: "SF Mono", "Cascadia Code", Consolas, Menlo, monospace; padding: 18px 20px; font-size: 13px; line-height: 1.85; overflow-x: auto; }
+  .terminal .body .ln { white-space: pre-wrap; word-break: break-word; }
+  .terminal .prompt { color: #6ee08a; }
+  .terminal .brand { color: #e0997a; font-weight: 700; }
+  .terminal .out { color: #b9b4aa; }
+  .terminal .hl { color: #ffd479; font-weight: 700; }
+  .terminal .opt { padding: 3px 0 3px 14px; }
+  .terminal .opt.sel { color: #ffd479; }
+  .terminal .opt.sel::before { content: "❯ "; color: #ffd479; }
+  .terminal .opt:not(.sel)::before { content: "  "; }
+  .terminal .comment { color: #8a8478; font-style: italic; }
+
+  .step-caption { font-size: 12.5px; color: var(--muted); text-align: center; margin-top: -8px; margin-bottom: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  th, td { text-align: left; padding: 12px 14px; vertical-align: top; border-bottom: 1px solid var(--line); }
+  th { background: #f5f1ea; color: #55504a; font-weight: 700; font-size: 12.5px; }
+  tr:last-child td { border-bottom: none; }
+  td code, p code, li code { background: #f1ede4; color: #a8462e; padding: 1px 6px; border-radius: 5px; font-family: "SF Mono", Consolas, Menlo, monospace; font-size: 12.5px; }
+
+  .tag { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .tag.ok { background: var(--ok-bg); color: var(--ok); }
+  .tag.warn { background: var(--warn-bg); color: var(--warn); }
+  .tag.no { background: var(--no-bg); color: var(--no); }
+
+  .note {
+    display: flex; gap: 12px; align-items: flex-start;
+    border-radius: 12px; padding: 14px 18px; margin: 16px 0; font-size: 13.5px;
+  }
+  .note.info { background: var(--brand-soft); border: 1px solid #f0d5c8; color: #6e3d2c; }
+  .note.warn { background: var(--warn-bg); border: 1px solid #f3ddab; color: #7a5205; }
+  .note .ic { font-size: 17px; line-height: 1.3; }
+
+  .conclusion { background: #24211d; color: #f6f3ee; border-radius: 16px; padding: 26px 28px; }
+  .conclusion h2 { color: #fff; }
+  .conclusion h2 .num { background: #fff; color: #24211d; }
+  .conclusion p { margin: 8px 0 0; font-size: 14.5px; opacity: .92; }
+
+  footer { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  footer a { color: var(--brand-dark); }
+  .disclaimer { font-size: 12px; color: var(--muted); background: #fff; border: 1px dashed var(--line); border-radius: 10px; padding: 12px 16px; margin-top: 14px; }
+
+  @media (max-width: 600px) {
+    header.hero { padding: 28px 22px; }
+    header.hero h1 { font-size: 20px; }
+    .card { padding: 16px 18px; }
+    th, td { padding: 10px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">QNA · 클로드 코드 첫 실행 가이드</p>
+    <h1>클로드 코드를 처음 실행하면 뜨는 질문들, 뭐라고 답해야 하나요?</h1>
+    <p>설치를 마치고 <code>claude</code>를 처음 입력하면 화면에 몇 가지 질문이 순서대로 나타납니다. 전부 뜻을 몰라도 사실 정답은 정해져 있어요. 하나씩 뭘 물어보는 건지, 뭘 눌러야 하는지, 그리고 "이 초기 설정을 꼭 다 해야 하는지"까지 정리했습니다.</p>
+    <div class="meta-row">
+      <span class="chip">🆕 최초 1회 실행</span>
+      <span class="chip">⏱ 1분이면 끝</span>
+      <span class="chip">🧑‍💻 개발 지식 불필요</span>
+    </div>
+  </header>
+
+  <p class="lead">💡 <b>이런 분을 위한 글이에요.</b> 클로드 코드 설치는 끝냈는데, 처음 실행했더니 못 보던 화면(테마 선택, 터미널 설정, 로그인, "이 폴더를 믿나요?" 같은 질문)이 연달아 떠서 뭘 눌러야 할지 몰랐던 분. 결론부터 말하면 <b>대부분 기본값(추천 옵션)을 그대로 선택하면 됩니다.</b></p>
+
+  <section>
+    <h2><span class="num">0</span> 이 질문들은 언제, 왜 뜨나요?<small>설치 프로그램이 컴퓨터에 클로드 코드를 깔아 놓은 것과, 그걸 "내 계정으로, 내 취향에 맞게" 처음 켜는 것은 별개의 단계예요.</small></h2>
+    <p class="sub">터미널(PowerShell 등)에서 <code>claude</code>라고 입력하고 Enter를 누르면, 이번이 이 컴퓨터(또는 이 폴더)에서 처음 실행하는 것인지 확인한 뒤 아래 순서로 화면이 넘어갑니다.</p>
+    <ul class="checklist">
+      <li><span class="dot">1</span> <div><b>화면 색상(테마) 고르기</b> — 눈에 편한 배색 선택</div></li>
+      <li><span class="dot">2</span> <div><b>터미널 단축키 설정 제안</b> — 줄바꿈 등 편의 기능 자동 설정 여부</div></li>
+      <li><span class="dot">3</span> <div><b>로그인</b> — 어떤 계정으로 쓸지 선택 후 브라우저 인증</div></li>
+      <li><span class="dot">4</span> <div><b>"이 폴더를 신뢰하나요?"</b> — 새 작업 폴더마다 한 번씩 확인</div></li>
+    </ul>
+    <div class="note info"><span class="ic">✅</span><div>이 4가지는 전부 <b>딱 한 번(또는 폴더마다 한 번)만</b> 나옵니다. 한 번 답하면 그다음부터는 <code>claude</code>만 입력해도 바로 대화 화면으로 들어갑니다.</div></div>
+  </section>
+
+  <section>
+    <h2><span class="num">1</span> 화면 색상(테마) 고르기<small>"Dark mode / Light mode 중 뭐가 내 터미널에 더 잘 보이나요?"를 묻는 화면입니다.</small></h2>
+
+    <div class="terminal">
+      <div class="bar">
+        <div class="title"><span class="sq"></span> claude</div>
+        <div class="wctl">— &nbsp; □ &nbsp; ×</div>
+      </div>
+      <div class="body">
+        <div class="ln"><span class="brand">Claude Code</span>에 오신 것을 환영합니다</div>
+        <div class="ln">&nbsp;</div>
+        <div class="ln out">터미널과 잘 어울리는 스타일을 골라주세요:</div>
+        <div class="ln">&nbsp;</div>
+        <div class="ln opt sel">다크 모드 (Dark mode)</div>
+        <div class="ln opt">라이트 모드 (Light mode)</div>
+        <div class="ln opt">다크 모드 — 색맹 배려 (Colorblind-friendly)</div>
+        <div class="ln opt">라이트 모드 — 색맹 배려 (Colorblind-friendly)</div>
+      </div>
+    </div>
+    <p class="step-caption">↑ / ↓ 방향키로 고르고 Enter</p>
+
+    <div class="card">
+      <h3>🖌 뭘 골라야 하나요?</h3>
+      <p>터미널 창 배경이 검은색/어두운 색이면 <b>다크 모드</b>, 흰색/밝은 색이면 <b>라이트 모드</b>를 고르면 됩니다. 색을 구분하기 어렵다면 "색맹 배려" 버전을 선택하세요. <b>뭘 골라도 기능 차이는 없고 순수하게 눈에 편한 걸 고르는 것</b>이라 정답은 없습니다.</p>
+      <p>나중에 마음이 바뀌면 대화창에 <code>/theme</code>라고 입력해서 언제든 바꿀 수 있어요. 지금 급하게 고민하지 않아도 됩니다.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> 터미널 단축키 자동 설정 제안<small>맥의 기본 "터미널" 앱 등에서 종종 나오는 화면으로, 줄바꿈·알림 관련 편의 기능을 자동으로 켜줄지 묻습니다.</small></h2>
+
+    <div class="terminal">
+      <div class="bar">
+        <div class="title"><span class="sq"></span> claude</div>
+        <div class="wctl">— &nbsp; □ &nbsp; ×</div>
+      </div>
+      <div class="body">
+        <div class="ln out">더 편하게 쓸 수 있도록 터미널을 설정할까요?</div>
+        <div class="ln out">— Option+Enter로 줄바꿈, 작업 완료 시 화면 깜빡임 알림</div>
+        <div class="ln">&nbsp;</div>
+        <div class="ln opt sel">예, 설정해 주세요 (Yes)</div>
+        <div class="ln opt">아니요, 나중에 할게요 (No)</div>
+      </div>
+    </div>
+    <p class="step-caption">이 화면은 터미널 종류에 따라 안 뜨기도 합니다</p>
+
+    <div class="card">
+      <h3>⌨️ 이건 뭘 하는 건가요?</h3>
+      <p>메시지를 입력하다가 줄을 바꾸고 싶을 때 <b>Option(Alt)+Enter</b> 같은 단축키가 바로 작동하게 해주고, 작업이 끝나면 화면이 살짝 깜빡여서 알려주는 등 편의 기능을 자동으로 켜주는 겁니다. 내 컴퓨터의 다른 설정을 건드리거나 위험한 작업이 아니라 <b>"예"를 선택하는 걸 추천</b>합니다.</p>
+      <p>"아니요"를 눌러도 문제는 없습니다 — 줄바꿈은 언제든 <code>Ctrl+J</code>를 누르거나 <code>\</code>를 입력한 뒤 Enter를 치면 되고, 나중에 <code>/terminal-setup</code>이라고 입력하면 이 설정을 다시 켤 수 있어요.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> 로그인 — 어떤 계정으로 쓸지 선택<small>회사/개인 Claude 계정으로 로그인해서 "누가 쓰고 있는지" 인증하는 단계입니다.</small></h2>
+
+    <div class="terminal">
+      <div class="bar">
+        <div class="title"><span class="sq"></span> claude</div>
+        <div class="wctl">— &nbsp; □ &nbsp; ×</div>
+      </div>
+      <div class="body">
+        <div class="ln out">로그인 방식을 선택하세요:</div>
+        <div class="ln">&nbsp;</div>
+        <div class="ln opt sel">Claude 계정으로 로그인 (구독 사용자 — Pro / Max / Team / Enterprise)</div>
+        <div class="ln opt">Claude Console 계정으로 로그인 (API 종량제 결제)</div>
+        <div class="ln">&nbsp;</div>
+        <div class="ln out">브라우저를 열어 로그인해주세요...</div>
+      </div>
+    </div>
+    <p class="step-caption">보통은 첫 번째 옵션 그대로 Enter</p>
+
+    <table>
+      <tr><th style="width:30%">옵션</th><th>이런 분이 고르세요</th></tr>
+      <tr>
+        <td><b>Claude 계정</b> <span class="tag ok">일반적으로 이걸 선택</span></td>
+        <td>회사에서 지급받은 Claude 계정, 또는 개인 Pro/Max 구독이 있는 경우. <code>claude.ai</code>에 로그인할 때 쓰는 이메일과 동일합니다.</td>
+      </tr>
+      <tr>
+        <td><b>Claude Console 계정</b></td>
+        <td>개발팀에서 API 키를 발급받아 쓰는 경우처럼, 별도의 종량제 결제 계정을 안내받은 경우에만 선택합니다. 잘 모르겠다면 첫 번째 옵션을 고르세요.</td>
+      </tr>
+    </table>
+
+    <div class="note info"><span class="ic">✅</span><div>선택 후에는 브라우저 창이 자동으로 열리고, 평소 쓰던 Claude 계정으로 로그인하면 끝입니다. 로그인 정보는 내 컴퓨터에 안전하게 저장되어 <b>다음부터는 이 과정 없이 바로</b> 대화 화면으로 들어갑니다.</div></div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> "이 폴더를 신뢰하나요?" — 새 작업 폴더에서 꼭 나오는 확인<small>클로드 코드가 처음 보는 폴더에 들어갈 때마다 뜨는 안전 장치예요. 매번 성가셔도 이유가 있습니다.</small></h2>
+
+    <div class="terminal">
+      <div class="bar">
+        <div class="title"><span class="sq"></span> claude</div>
+        <div class="wctl">— &nbsp; □ &nbsp; ×</div>
+      </div>
+      <div class="body">
+        <div class="ln out">이 폴더의 파일을 신뢰하시나요?</div>
+        <div class="ln comment"># C:\Users\내이름\Documents\MyProject</div>
+        <div class="ln">&nbsp;</div>
+        <div class="ln out">클로드 코드는 이 폴더 안의 파일을 읽고, 수정을 제안할 수 있습니다.</div>
+        <div class="ln out">낯선 사람이 준 폴더라면 신뢰하기 전에 내용을 확인하세요.</div>
+        <div class="ln">&nbsp;</div>
+        <div class="ln opt sel">예, 이 폴더를 신뢰합니다</div>
+        <div class="ln opt">아니요</div>
+      </div>
+    </div>
+    <p class="step-caption">폴더별로 처음 한 번만 뜨고, 이후엔 같은 폴더에서 다시 안 뜹니다</p>
+
+    <div class="card">
+      <h3>🔒 왜 이런 걸 물어보나요?</h3>
+      <p>클로드 코드는 지금 열려 있는 폴더 안의 파일들을 읽고 그 내용을 참고해서 답합니다. 그런데 만약 그 폴더 안에 <b>악의적으로 조작된 파일</b>(예: 이상한 지시가 숨겨진 문서)이 있다면, AI가 그 내용에 속아 원치 않는 행동을 할 위험이 있어요. "이 폴더를 신뢰하나요?"는 <b>내가 직접 만들었거나 출처가 확실한 폴더에서만 작업을 시작하라</b>는 안전장치입니다.</p>
+      <p><b>내가 직접 만든 회사/개인 작업 폴더라면 그냥 "예"를 선택하면 됩니다.</b> 반대로 이메일 첨부파일을 풀어놓은 폴더, 누가 준 압축파일을 그대로 연 폴더처럼 출처가 불분명한 경우엔 신뢰하기 전에 폴더 안 파일을 먼저 눈으로 확인하는 게 안전합니다.</p>
+    </div>
+
+    <div class="note warn"><span class="ic">⚠️</span><div><b>바탕화면이나 "내 문서" 최상위, 사용자 홈 폴더에서 바로 실행하면?</b> 이 확인이 "이번 실행에서만" 유효하고 컴퓨터에 저장되지 않아, <b>실행할 때마다 매번 다시 뜹니다.</b> 매번 묻지 않게 하려면 <code>cd</code>로 실제 작업용 하위 폴더(예: <code>Documents\MyProject</code>)로 이동한 뒤 <code>claude</code>를 실행하세요 — 그 폴더에 대한 신뢰는 저장되어 다음부터 다시 묻지 않습니다.</div></div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> 이건 첫 실행 질문이 아니에요 — "권한 승인" 팝업과 헷갈리지 마세요</h2>
+    <div class="card">
+      <p>위 4가지를 다 지나면 대화 화면이 나옵니다. 이후 실제로 클로드에게 "이 파일 고쳐줘", "이 명령어 실행해줘" 같은 작업을 시키면, 그때마다 <b>"이 작업을 진행해도 될까요?"</b> 같은 승인 팝업이 따로 뜹니다. 이건 초기 설정이 아니라 <b>작업할 때마다 매번 확인하는 안전장치</b>이니 별개로 이해하면 됩니다. 반복되는 작업이라면 "항상 허용" 옵션을 선택해 다음부터 묻지 않게 할 수도 있어요.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> 그래서, 초기 설정을 꼭 다 해야 하나요?</h2>
+    <table>
+      <tr><th style="width:22%">질문</th><th style="width:14%">필수 여부</th><th>이유</th></tr>
+      <tr>
+        <td>테마(색상) 선택</td>
+        <td><span class="tag warn">선택 필요하지만 부담 없음</span></td>
+        <td>화면에 표시는 되지만 아무거나 골라도 기능엔 영향 없음. <code>/theme</code>로 언제든 재설정 가능.</td>
+      </tr>
+      <tr>
+        <td>터미널 단축키 설정</td>
+        <td><span class="tag ok">건너뛰어도 무방</span></td>
+        <td>편의 기능일 뿐. "아니요"를 눌러도 클로드 코드는 정상 작동하며, <code>/terminal-setup</code>으로 나중에 켤 수 있음.</td>
+      </tr>
+      <tr>
+        <td>로그인</td>
+        <td><span class="tag no">필수</span></td>
+        <td>로그인하지 않으면 클로드와 대화 자체가 불가능. 건너뛸 수 없음.</td>
+      </tr>
+      <tr>
+        <td>폴더 신뢰 확인</td>
+        <td><span class="tag no">필수</span></td>
+        <td>보안 장치라 매 폴더 최초 1회는 반드시 답해야 다음 단계로 진행됨. "아니요"를 누르면 그 폴더에서는 작업을 시작하지 않음.</td>
+      </tr>
+    </table>
+    <div class="note info"><span class="ic">💡</span><div>결론적으로 <b>실질적인 "필수"는 로그인과 폴더 신뢰 확인 2가지뿐</b>이고, 나머지(테마·터미널 단축키)는 취향과 편의의 문제라 아무거나 골라도 나중에 얼마든지 바꿀 수 있습니다. 정답을 몰라서 헤맬 필요 없이, 기본으로 선택되어 있는 옵션 그대로 Enter를 눌러도 충분합니다.</div></div>
+  </section>
+
+  <div class="conclusion">
+    <h2><span class="num">✓</span> 결론</h2>
+    <p>클로드 코드를 처음 켜면 테마 선택 → 터미널 설정 제안 → 로그인 → "이 폴더를 신뢰하나요?" 순으로 화면이 뜹니다. 테마와 터미널 설정은 편의 기능이라 아무거나 골라도(또는 건너뛰어도) 무방하고, 로그인과 폴더 신뢰 확인만 실제로 꼭 필요한 단계입니다. 헷갈리면 화면에 미리 선택되어 있는 옵션 그대로 Enter를 누르면 됩니다 — 전체 과정은 1분이 채 걸리지 않습니다.</p>
+  </div>
+
+  <footer>
+    <p>참고: Claude Code 공식 문서 (code.claude.com/docs) — 터미널 설정, 인증, 보안 안내 페이지, 2026년 7월 기준.</p>
+    <div class="disclaimer">이 문서는 클로드 코드를 처음 접하는 사내 구성원을 위한 QNA 자료입니다. 화면의 정확한 문구·순서는 운영체제·터미널 종류·버전 업데이트에 따라 달라질 수 있습니다.</div>
+  </footer>
+
+</div>
+</body>
+</html>

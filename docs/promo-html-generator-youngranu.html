@@ -69,6 +69,7 @@
     gap: 6px; margin-bottom: 6px; align-items: center;
   }
   .area-row input, .area-row select { padding: 6px 8px; font-size: 12.5px; }
+  .area-row .stack { display: flex; flex-direction: column; gap: 4px; }
   .area-row button {
     border: none; background: none; color: #c0392b; cursor: pointer; font-size: 15px; padding: 0 4px;
   }
@@ -360,7 +361,10 @@ function genComponent(c) {
           if (a.action === 'anchor') {
             out.push('<area shape="rect" coords="' + escAttr(a.coords) + '" href="#' + escAttr(a.value.replace(/^#/, '')) + '">');
           } else {
-            out.push('<area shape="rect" coords="' + escAttr(a.coords) + '" href="' + escAttr(a.value) + '"' + (label ? ' alt="' + escAttr(label) + '"' : '') + '>');
+            const href = a.action === 'coupon'
+              ? 'https://youngranu.co.kr/exec/front/newcoupon/IssueDownload?coupon_no=' + a.value.trim() + '&opener_url=' + encodeURIComponent((a.ret || '').trim())
+              : a.value;
+            out.push('<area shape="rect" coords="' + escAttr(a.coords) + '" href="' + escAttr(href) + '"' + (label ? ' alt="' + escAttr(label) + '"' : '') + '>');
           }
         }
         out.push('</map>');
@@ -454,20 +458,27 @@ function bodyHtml(c) {
   const memo = fieldHtml(id, 'memo', '주석 (섹션 이름 메모, 선택)', d.memo, { ph: '예: 쿠폰 2종, TOP 10' });
   switch (c.type) {
     case 'image': {
-      const areaRows = d.areas.map((a, i) =>
-        '<div class="area-row">' +
+      const areaRows = d.areas.map((a, i) => {
+        const valueCell = a.action === 'coupon'
+          ? '<div class="stack">' +
+            '<input type="text" data-cid="' + id + '" data-area="' + i + '" data-akey="value" value="' + escHtml(a.value) + '" placeholder="쿠폰넘버 (예: 6085730007600000125)">' +
+            '<input type="text" data-cid="' + id + '" data-area="' + i + '" data-akey="ret" value="' + escHtml(a.ret || '') + '" placeholder="returnURL (예: /product/project.html?cate_no=204)">' +
+            '</div>'
+          : '<input type="text" data-cid="' + id + '" data-area="' + i + '" data-akey="value" value="' + escHtml(a.value) + '" placeholder="' +
+            (a.action === 'anchor' ? '앵커명 (예: 5coupon)' : '링크 주소') + '">';
+        return '<div class="area-row">' +
         '<input type="text" data-cid="' + id + '" data-area="' + i + '" data-akey="coords" value="' + escHtml(a.coords) + '" placeholder="coords: 42,346,708,557">' +
         '<select data-cid="' + id + '" data-area="' + i + '" data-akey="action">' +
         '<option value="link"' + (a.action === 'link' ? ' selected' : '') + '>링크 이동</option>' +
         '<option value="anchor"' + (a.action === 'anchor' ? ' selected' : '') + '>앵커 이동</option>' +
+        '<option value="coupon"' + (a.action === 'coupon' ? ' selected' : '') + '>쿠폰 다운로드</option>' +
         '</select>' +
-        '<input type="text" data-cid="' + id + '" data-area="' + i + '" data-akey="value" value="' + escHtml(a.value) + '" placeholder="' +
-          (a.action === 'anchor' ? '앵커명 (예: 5coupon)' : '링크 주소') + '">' +
+        valueCell +
         '<input type="text" data-cid="' + id + '" data-area="' + i + '" data-akey="label" value="' + escHtml(a.label || '') + '" placeholder="라벨/alt (선택)">' +
         '<button class="pick" data-cid="' + id + '" data-pickarea="' + i + '" title="이미지에서 드래그로 좌표 지정">따기</button>' +
         '<button data-cid="' + id + '" data-delarea="' + i + '" title="영역 삭제">✕</button>' +
-        '</div>'
-      ).join('');
+        '</div>';
+      }).join('');
       return memo +
         fieldHtml(id, 'src', '이미지 주소 *', d.src, { ph: 'https://...', hint: 'display:block; margin:0 auto; 스타일이 자동으로 붙습니다.' }) +
         fieldHtml(id, 'anchorId', '앵커 id (선택)', d.anchorId, { hint: '다른 영역에서 이 이미지로 이동시킬 때 사용. 예: 5coupon, bestseller', ph: '' }) +
@@ -569,7 +580,7 @@ $list.addEventListener('click', e => {
   const c = findComp(cid);
   if (!c) return;
   if (t.dataset.addarea) {
-    c.data.areas.push({ coords: '', action: 'link', value: '', label: '' });
+    c.data.areas.push({ coords: '', action: 'link', value: '', ret: '', label: '' });
     renderAll();
   } else if (t.dataset.pickarea !== undefined) {
     openPicker(c, Number(t.dataset.pickarea));
@@ -671,8 +682,16 @@ function parseAreas(mapEl, notes) {
     const label = ((n.getAttribute('alt') || '').trim() || pending.join(' / ')).trim();
     pending = [];
     const href = (n.getAttribute('href') || '').trim();
-    if (href.startsWith('#')) areas.push({ coords, action: 'anchor', value: href.slice(1), label });
-    else areas.push({ coords, action: 'link', value: href, label });
+    if (href.startsWith('#')) {
+      areas.push({ coords, action: 'anchor', value: href.slice(1), label });
+    } else if (/\/exec\/front\/newcoupon\/IssueDownload\?/i.test(href)) {
+      const qs = new URLSearchParams(href.split('?').slice(1).join('?'));
+      const cno = (qs.get('coupon_no') || '').trim();
+      if (cno) areas.push({ coords, action: 'coupon', value: cno, ret: qs.get('opener_url') || '', label });
+      else areas.push({ coords, action: 'link', value: href, label });
+    } else {
+      areas.push({ coords, action: 'link', value: href, label });
+    }
   }
   return areas;
 }

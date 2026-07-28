@@ -362,7 +362,7 @@ function genComponent(c) {
             out.push('<area shape="rect" coords="' + escAttr(a.coords) + '" href="#' + escAttr(a.value.replace(/^#/, '')) + '">');
           } else {
             const href = a.action === 'coupon'
-              ? 'https://youngranu.co.kr/exec/front/newcoupon/IssueDownload?coupon_no=' + a.value.trim() + '&opener_url=' + encodeURIComponent((a.ret || '').trim())
+              ? '/exec/front/newcoupon/IssueDownload?coupon_no=' + a.value.trim() + '&opener_url=' + encodeURIComponent((a.ret || '').trim())
               : a.value;
             out.push('<area shape="rect" coords="' + escAttr(a.coords) + '" href="' + escAttr(href) + '"' + (label ? ' alt="' + escAttr(label) + '"' : '') + '>');
           }

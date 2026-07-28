@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프로모션 페이지 HTML 생성기</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    margin: 0; background: #f0f2f5; color: #222; font-size: 14px;
+  }
+  header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 24px; background: #fff; border-bottom: 1px solid #dfe3e8;
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { font-size: 18px; margin: 0; flex: 1; }
+  .layout {
+    display: grid; grid-template-columns: minmax(420px, 1fr) minmax(420px, 1fr);
+    gap: 16px; padding: 16px 24px; align-items: start;
+  }
+  /* ---------- left ---------- */
+  .comp {
+    background: #fff; border: 1px solid #dfe3e8; border-radius: 10px;
+    margin-bottom: 12px; overflow: hidden;
+  }
+  .comp-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; background: #f7f9fb; border-bottom: 1px solid #eceff2;
+  }
+  .comp-head .num {
+    background: #2f6fed; color: #fff; border-radius: 6px;
+    font-size: 12px; font-weight: 700; padding: 2px 8px;
+  }
+  .comp-head select { flex: 1; }
+  .comp-head button {
+    border: 1px solid #d0d5db; background: #fff; border-radius: 6px;
+    padding: 3px 8px; cursor: pointer; font-size: 12px; color: #555;
+  }
+  .comp-head button:hover { background: #eef2f6; }
+  .comp-head button.del { color: #c0392b; }
+  .comp-body { padding: 12px; }
+  .field { margin-bottom: 10px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: #556; margin-bottom: 4px; }
+  .field input[type=text], .field textarea, select {
+    width: 100%; padding: 7px 9px; border: 1px solid #ccd2d9; border-radius: 6px;
+    font-size: 13px; font-family: inherit;
+  }
+  .field textarea { resize: vertical; min-height: 56px; font-family: "SF Mono", Menlo, monospace; font-size: 12px; }
+  .field .hint { font-size: 11.5px; color: #98a1ab; margin-top: 3px; }
+  .radio-row { display: flex; gap: 14px; padding: 4px 0; }
+  .radio-row label { font-weight: 400; font-size: 13px; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+  .check-row label { font-weight: 400; font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  /* areas */
+  .areas { border: 1px dashed #ccd2d9; border-radius: 8px; padding: 10px; background: #fafbfc; }
+  .areas-title { font-size: 12px; font-weight: 700; color: #556; margin-bottom: 8px; }
+  .area-row {
+    display: grid; grid-template-columns: 1.2fr 1fr 1.4fr auto auto;
+    gap: 6px; margin-bottom: 6px; align-items: center;
+  }
+  .area-row input, .area-row select { padding: 6px 8px; font-size: 12.5px; }
+  .area-row button {
+    border: none; background: none; color: #c0392b; cursor: pointer; font-size: 15px; padding: 0 4px;
+  }
+  .area-row button.pick {
+    border: 1px solid #2f6fed; border-radius: 6px; color: #2f6fed;
+    font-size: 12px; padding: 4px 8px; white-space: nowrap;
+  }
+  .area-row button.pick:hover { background: #eaf0fb; }
+  .add-area {
+    border: 1px solid #ccd2d9; background: #fff; border-radius: 6px;
+    padding: 5px 10px; font-size: 12px; cursor: pointer; color: #2f6fed;
+  }
+  .add-comp {
+    width: 100%; padding: 14px; border: 2px dashed #b9c2cc; border-radius: 10px;
+    background: none; font-size: 14px; font-weight: 600; color: #2f6fed; cursor: pointer;
+  }
+  .add-comp:hover { background: #eaf0fb; }
+  .empty-msg { text-align: center; color: #98a1ab; padding: 30px 0 14px; font-size: 13px; }
+  /* ---------- right ---------- */
+  .preview {
+    position: sticky; top: 74px; background: #fff; border: 1px solid #dfe3e8;
+    border-radius: 10px; display: flex; flex-direction: column;
+    max-height: calc(100vh - 100px);
+  }
+  .preview-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; border-bottom: 1px solid #eceff2;
+  }
+  .preview-head .t { font-weight: 700; flex: 1; }
+  .btn {
+    border: none; border-radius: 7px; padding: 8px 16px; font-size: 13px;
+    font-weight: 600; cursor: pointer;
+  }
+  .btn-copy { background: #2f6fed; color: #fff; }
+  .btn-copy:hover { background: #245cd4; }
+  .btn-reset { background: #fff; border: 1px solid #d0d5db; color: #777; font-weight: 400; }
+  .btn-reset:hover { color: #c0392b; border-color: #c0392b; }
+  pre#output {
+    margin: 0; padding: 14px; overflow: auto; flex: 1;
+    font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 12px; line-height: 1.55;
+    white-space: pre-wrap; word-break: break-all; color: #333;
+  }
+  .preview-head .tabs { display: flex; gap: 4px; flex: 1; }
+  .tab {
+    border: 1px solid #d0d5db; background: #fff; color: #667; border-radius: 7px;
+    padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .tab:hover { background: #eef2f6; }
+  .tab.active { background: #2f6fed; border-color: #2f6fed; color: #fff; }
+  .render-pane { display: flex; flex-direction: column; flex: 1; min-height: calc(100vh - 250px); }
+  .render-pane[hidden] { display: none; }
+  .render-bar {
+    display: flex; align-items: center; gap: 16px; padding: 8px 14px;
+    border-bottom: 1px solid #eceff2; font-size: 12.5px; color: #556;
+  }
+  .render-bar .seg { display: flex; border: 1px solid #ccd2d9; border-radius: 6px; overflow: hidden; }
+  .render-bar .seg button { border: none; background: #fff; padding: 4px 12px; font-size: 12px; cursor: pointer; color: #667; }
+  .render-bar .seg button.on { background: #2f6fed; color: #fff; }
+  .render-bar .chk { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .render-wrap { flex: 1; overflow: auto; background: #e8ebef; padding: 14px; display: flex; justify-content: center; }
+  #renderFrame {
+    display: block; width: 750px; max-width: 100%; flex-shrink: 0;
+    min-height: 400px; border: 1px solid #c5cbd2; background: #fff;
+  }
+  #renderFrame.mo { width: 375px; }
+  .render-status {
+    padding: 7px 14px; border-top: 1px solid #eceff2; font-size: 12px; color: #667;
+    font-family: "SF Mono", Menlo, monospace; min-height: 30px; word-break: break-all;
+  }
+  .warnings { padding: 0 14px 12px; }
+  .warn {
+    background: #fff4f2; border: 1px solid #f2c4bc; color: #b03a2e;
+    border-radius: 6px; padding: 7px 10px; font-size: 12.5px; margin-top: 6px;
+  }
+  .btn-import { background: #fff; border: 1px solid #2f6fed; color: #2f6fed; }
+  .btn-import:hover { background: #eaf0fb; }
+  .note {
+    background: #eef4ff; border: 1px solid #bcd0f5; color: #2f5eb8;
+    border-radius: 6px; padding: 7px 10px; font-size: 12.5px; margin-top: 6px;
+  }
+  /* ---------- HTML 불러오기 모달 ---------- */
+  .import-overlay {
+    position: fixed; inset: 0; z-index: 100; background: rgba(20,24,30,.55);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .import-overlay[hidden] { display: none; }
+  .import-panel {
+    background: #fff; border-radius: 12px; padding: 20px 22px;
+    width: 580px; max-width: calc(100vw - 40px); max-height: calc(100vh - 60px);
+    overflow: auto; box-shadow: 0 12px 40px rgba(0,0,0,.25);
+  }
+  .import-panel h2 { margin: 0 0 14px; font-size: 16px; }
+  #importText { min-height: 150px; }
+  .import-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    background: #222; color: #fff; padding: 10px 22px; border-radius: 20px;
+    font-size: 13px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 999;
+  }
+  .toast.show { opacity: 1; }
+  /* ---------- 영역 따기 (coords picker) ---------- */
+  .picker {
+    position: fixed; inset: 0; z-index: 100; background: rgba(20,24,30,.82);
+    display: flex; flex-direction: column;
+  }
+  .picker[hidden] { display: none; }
+  .picker-head {
+    display: flex; align-items: center; gap: 14px; padding: 12px 20px;
+    background: #fff; border-bottom: 1px solid #dfe3e8; flex-wrap: wrap;
+  }
+  .picker-head .msg { font-weight: 600; }
+  .picker-head .picker-coords {
+    font-family: "SF Mono", Menlo, monospace; font-size: 13px;
+    background: #f4f6f8; border-radius: 6px; padding: 5px 10px; min-width: 180px; text-align: center;
+  }
+  .picker-head .zoom { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #667; margin-left: auto; }
+  .picker-scroll { flex: 1; overflow: auto; padding: 24px; }
+  .picker-stage {
+    position: relative; margin: 0 auto; width: fit-content;
+    cursor: crosshair; user-select: none; -webkit-user-select: none;
+  }
+  .picker-stage img { display: block; width: 750px; height: auto; pointer-events: none; }
+  .pk-box { position: absolute; pointer-events: none; box-sizing: border-box; }
+  .pk-box.other { border: 1.5px dashed rgba(120,200,255,.9); background: rgba(120,200,255,.12); }
+  .pk-box.other .tag {
+    position: absolute; top: -1px; left: -1px; background: rgba(70,140,220,.9); color: #fff;
+    font-size: 11px; padding: 1px 6px; border-radius: 0 0 6px 0;
+  }
+  .pk-box.sel { border: 2px solid #ff5252; background: rgba(255,82,82,.18); }
+</style>
+</head>
+<body>
+<header>
+  <h1>프로모션 페이지 HTML 생성기</h1>
+  <button class="btn btn-import" id="btnImport">HTML 불러오기</button>
+  <button class="btn btn-reset" id="btnReset">전체 초기화</button>
+</header>
+
+<div class="layout">
+  <div id="left">
+    <div id="compList"></div>
+    <button class="add-comp" id="btnAdd">+ 컴포넌트 추가</button>
+  </div>
+
+  <div class="preview">
+    <div class="preview-head">
+      <div class="tabs">
+        <button class="tab active" data-tab="code" id="tabCode">코드</button>
+        <button class="tab" data-tab="render" id="tabRender">렌더링</button>
+      </div>
+      <button class="btn btn-copy" id="btnCopy">복사하기</button>
+    </div>
+    <pre id="output"></pre>
+    <div class="render-pane" id="renderPane" hidden>
+      <div class="render-bar">
+        <div class="seg">
+          <button id="devPc" class="on">PC (750px)</button>
+          <button id="devMo">모바일 (375px)</button>
+        </div>
+        <label class="chk"><input type="checkbox" id="chkAreas"> 클릭 영역 표시</label>
+      </div>
+      <div class="render-wrap">
+        <iframe id="renderFrame" sandbox="allow-scripts" title="렌더링 미리보기"></iframe>
+      </div>
+      <div class="render-status" id="renderStatus">링크·모달 영역을 클릭해 보세요 — 이동 대신 여기에 동작이 표시됩니다</div>
+    </div>
+    <div class="warnings" id="warnings"></div>
+  </div>
+</div>
+
+<div class="picker" id="picker" hidden>
+  <div class="picker-head">
+    <span class="msg">이미지 위에서 드래그하여 클릭 영역을 지정하세요</span>
+    <span class="picker-coords" id="pickerCoords">—</span>
+    <button class="btn btn-copy" id="pickerApply" disabled>적용</button>
+    <button class="btn btn-reset" id="pickerCancel">취소 (Esc)</button>
+    <span class="zoom">확대/축소
+      <input type="range" id="pickerZoom" min="300" max="1500" step="50" value="750"> <span id="pickerZoomVal">750px</span>
+    </span>
+  </div>
+  <div class="picker-scroll">
+    <div class="picker-stage" id="pickerStage">
+      <img id="pickerImg" draggable="false" alt="">
+    </div>
+  </div>
+</div>
+
+<div class="import-overlay" id="importModal" hidden>
+  <div class="import-panel">
+    <h2>HTML 불러오기 (템플릿 재사용)</h2>
+    <div class="field">
+      <label>HTML 파일 선택</label>
+      <input type="file" id="importFile" accept=".html,.htm,.txt">
+      <div class="hint">파일을 선택하면 내용이 아래 입력창에 채워집니다. UTF-8 / EUC-KR 자동 감지.</div>
+    </div>
+    <div class="field">
+      <label>또는 소스 직접 붙여넣기</label>
+      <textarea id="importText" placeholder="&lt;center&gt; ... &lt;/center&gt; 전체 소스를 붙여넣으세요"></textarea>
+      <div class="hint">수작업 찌꺼기(%22 오염, img="" 속성, title, 특수 공백)는 자동 정리됩니다.</div>
+    </div>
+    <div class="field"><div class="radio-row">
+      <label><input type="radio" name="importMode" value="replace" checked>전체 교체</label>
+      <label><input type="radio" name="importMode" value="append">현재 목록 뒤에 추가</label>
+    </div></div>
+    <div class="import-actions">
+      <button class="btn btn-reset" id="importCancel">취소 (Esc)</button>
+      <button class="btn btn-copy" id="importRun">불러오기</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+/* ================= 상태 ================= */
+const TYPES = {
+  image:    '이미지 (PC/모바일)',
+  br:       '줄바꿈',
+  modal:    '모달 팝업 내용',
+  goods:    '제품 리스트 (상품 진열)',
+  video:    '영상 삽입 (임베드)',
+  floating: '플로팅 버튼',
+  raw:      '직접 입력 (자유 HTML)',
+};
+
+let state = { components: [] };
+let uid = 1;
+
+function defaultData(type) {
+  switch (type) {
+    case 'image':    return { memo: '', src: '', anchorId: '', areas: [] };
+    case 'br':       return {};
+    case 'modal':    return { memo: '', num: '01', src: '' };
+    case 'goods':    return { memo: '', num: '', codes: '' };
+    case 'video':    return { memo: '', device: 'pc', url: '' };
+    case 'floating': return { memo: '', device: 'pc', landing: '', src: '' };
+    case 'raw':      return { memo: '', html: '' };
+  }
+}
+
+function addComponent(type) {
+  state.components.push({ id: uid++, type, data: defaultData(type) });
+  renderAll();
+}
+
+/* ================= 코드 생성 ================= */
+function escAttr(v) {
+  return (v || '').trim().replace(/&(?!amp;|quot;|#)/g, '&amp;').replace(/"/g, '&quot;');
+}
+
+function ytEmbed(url) {
+  url = (url || '').trim();
+  const m = url.match(/(?:youtube\.com\/(?:embed\/|watch\?.*?v=|shorts\/)|youtu\.be\/)([\w-]{6,})/);
+  if (m) {
+    const si = url.match(/[?&]si=([\w-]+)/);
+    return 'https://www.youtube.com/embed/' + m[1] + (si ? '?si=' + si[1] : '');
+  }
+  return url; // 파싱 실패 시 원본 그대로
+}
+
+let mapCounter = 0;
+function genComponent(c) {
+  const d = c.data;
+  const out = [];
+  if (d.memo && d.memo.trim()) out.push('<!--' + d.memo.trim() + '-->');
+
+  switch (c.type) {
+    case 'image': {
+      const attrs = [];
+      if (d.anchorId.trim()) attrs.push('id="' + escAttr(d.anchorId) + '"');
+      attrs.push('src="' + escAttr(d.src) + '"');
+      attrs.push('class="js-smart-img"');
+      let mapName = '';
+      const areas = d.areas.filter(a => a.coords.trim());
+      if (areas.length) {
+        mapCounter++;
+        mapName = 'image-map' + String(mapCounter).padStart(2, '0');
+        attrs.push('usemap="#' + mapName + '"');
+      }
+      out.push('<img ' + attrs.join(' ') + '>');
+      if (areas.length) {
+        out.push('<map name="' + mapName + '">');
+        for (const a of areas) {
+          if (a.action === 'modal') {
+            out.push('<area class="modal_open" data-target-id="' + escAttr(a.value) + '" coords="' + escAttr(a.coords) + '" shape="rect">');
+          } else if (a.action === 'anchor') {
+            out.push('<area coords="' + escAttr(a.coords) + '" shape="rect" href="#' + escAttr(a.value.replace(/^#/, '')) + '">');
+          } else {
+            out.push('<area coords="' + escAttr(a.coords) + '" shape="rect" href="' + escAttr(a.value) + '">');
+          }
+        }
+        out.push('</map>');
+      }
+      break;
+    }
+    case 'br':
+      out.push('<br>');
+      break;
+    case 'modal': {
+      const n = escAttr(d.num);
+      out.push('<div class="modal popup' + n + '" data-target-id="' + n + '"><div style="text-align: center;" align="center"><a class="modal_close" data-target-id="' + n + '">X</a></div>');
+      out.push('<div class="imgWrap" style="text-align: center;">');
+      out.push('<img src="' + escAttr(d.src) + '"' + ' class="js-smart-img">');
+      out.push('</div>');
+      out.push('</div>');
+      break;
+    }
+    case 'goods': {
+      const codes = d.codes.split(/[\s,]+/).filter(Boolean).join(',');
+      out.push('<div class="saleGoodsList js-sgl' + escAttr(d.num) + '" data-goodsarr="' + codes + '"></div>');
+      break;
+    }
+    case 'video': {
+      const src = escAttr(ytEmbed(d.url));
+      const allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      if (d.device === 'pc') {
+        out.push('<div style="text-align: center;" align="center">');
+        out.push('<iframe width="750" height="400" src="' + src + '" title="YouTube video player" frameborder="0" allow="' + allow + '" allowfullscreen="">');
+        out.push('</iframe></div>');
+      } else {
+        out.push('<div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden;">');
+        out.push('<iframe src="' + src + '" title="YouTube video player" frameborder="0" allow="' + allow + '" allowfullscreen="" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">');
+        out.push('</iframe>');
+        out.push('</div>');
+      }
+      break;
+    }
+    case 'floating': {
+      if (d.device === 'pc') {
+        out.push('<div style="text-align: center;" align="center"><div style="position:fixed; bottom:45px; left:0; right:0; margin:0 auto;">');
+        out.push('<a href="' + escAttr(d.landing) + '">');
+        out.push('<img src="' + escAttr(d.src) + '" style="width: 750px;">');
+        out.push('</a></div></div>');
+      } else {
+        out.push('<div style="position:fixed; bottom:60px; left:0; right:0; margin:0 auto;">');
+        out.push('<a href="' + escAttr(d.landing) + '">');
+        out.push('<img src="' + escAttr(d.src) + '" style="width: 100%;">');
+        out.push('</a></div>');
+      }
+      break;
+    }
+    case 'raw':
+      out.push((d.html || '').trim());
+      break;
+  }
+  return out.join('\n');
+}
+
+function generate() {
+  mapCounter = 0;
+  const blocks = state.components.map(genComponent).filter(b => b.trim());
+  if (!blocks.length) return '';
+  return '<center>\n\n' + blocks.join('\n\n\n') + '\n\n</center>';
+}
+
+/* ================= 검증 ================= */
+function validate() {
+  const warns = [];
+  const modalDefs = new Set(), modalRefs = new Set();
+  const anchorDefs = new Set(), anchorRefs = new Set();
+  const sglNums = [];
+  for (const c of state.components) {
+    const d = c.data;
+    if (c.type === 'modal' && d.num.trim()) modalDefs.add(d.num.trim());
+    if (c.type === 'goods' && d.num.trim()) sglNums.push(d.num.trim());
+    if (c.type === 'image') {
+      if (d.anchorId.trim()) anchorDefs.add(d.anchorId.trim());
+      for (const a of d.areas) {
+        if (!a.coords.trim()) continue;
+        if (a.action === 'modal' && a.value.trim()) modalRefs.add(a.value.trim());
+        if (a.action === 'anchor' && a.value.trim()) anchorRefs.add(a.value.trim().replace(/^#/, ''));
+      }
+    }
+  }
+  for (const r of modalRefs) if (!modalDefs.has(r)) warns.push('모달 번호 "' + r + '"를 여는 영역이 있지만, 해당 번호의 [모달 팝업 내용] 컴포넌트가 없습니다.');
+  for (const m of modalDefs) if (!modalRefs.has(m)) warns.push('[모달 팝업 내용] "' + m + '"이 있지만, 이 모달을 여는 영역(모달 열기)이 없습니다.');
+  for (const r of anchorRefs) if (!anchorDefs.has(r)) warns.push('앵커 "#' + r + '"로 이동하는 영역이 있지만, 앵커 id "' + r + '"가 지정된 이미지가 없습니다.');
+  const dupSgl = sglNums.filter((n, i) => sglNums.indexOf(n) !== i);
+  for (const n of [...new Set(dupSgl)]) warns.push('제품 리스트 번호 "js-sgl' + n + '"이 중복되었습니다. 번호는 고유해야 합니다.');
+  return warns;
+}
+
+/* ================= 렌더링 ================= */
+const $list = document.getElementById('compList');
+const $output = document.getElementById('output');
+const $warnings = document.getElementById('warnings');
+
+function fieldHtml(cid, key, label, value, opts = {}) {
+  const hint = opts.hint ? '<div class="hint">' + opts.hint + '</div>' : '';
+  if (opts.textarea) {
+    return '<div class="field"><label>' + label + '</label><textarea data-cid="' + cid + '" data-key="' + key + '" placeholder="' + (opts.ph || '') + '">' + escHtml(value) + '</textarea>' + hint + '</div>';
+  }
+  return '<div class="field"><label>' + label + '</label><input type="text" data-cid="' + cid + '" data-key="' + key + '" value="' + escHtml(value) + '" placeholder="' + (opts.ph || '') + '">' + hint + '</div>';
+}
+function escHtml(v) {
+  return (v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+}
+function radioHtml(cid, key, value, options) {
+  return '<div class="field"><div class="radio-row">' + options.map(([v, l]) =>
+    '<label><input type="radio" name="r' + cid + key + '" data-cid="' + cid + '" data-key="' + key + '" value="' + v + '"' + (value === v ? ' checked' : '') + '>' + l + '</label>'
+  ).join('') + '</div></div>';
+}
+
+function bodyHtml(c) {
+  const d = c.data, id = c.id;
+  const memo = fieldHtml(id, 'memo', '주석 (섹션 이름 메모, 선택)', d.memo, { ph: '예: 쿠폰 2종, TOP 10' });
+  switch (c.type) {
+    case 'image': {
+      const areaRows = d.areas.map((a, i) =>
+        '<div class="area-row">' +
+        '<input type="text" data-cid="' + id + '" data-area="' + i + '" data-akey="coords" value="' + escHtml(a.coords) + '" placeholder="coords: 54,363,705,577">' +
+        '<select data-cid="' + id + '" data-area="' + i + '" data-akey="action">' +
+        '<option value="link"' + (a.action === 'link' ? ' selected' : '') + '>링크 이동</option>' +
+        '<option value="anchor"' + (a.action === 'anchor' ? ' selected' : '') + '>앵커 이동</option>' +
+        '<option value="modal"' + (a.action === 'modal' ? ' selected' : '') + '>모달 열기</option>' +
+        '</select>' +
+        '<input type="text" data-cid="' + id + '" data-area="' + i + '" data-akey="value" value="' + escHtml(a.value) + '" placeholder="' +
+          (a.action === 'modal' ? '모달 번호 (예: 01)' : a.action === 'anchor' ? '앵커명 (예: a)' : '링크 주소') + '">' +
+        '<button class="pick" data-cid="' + id + '" data-pickarea="' + i + '" title="이미지에서 드래그로 좌표 지정">따기</button>' +
+        '<button data-cid="' + id + '" data-delarea="' + i + '" title="영역 삭제">✕</button>' +
+        '</div>'
+      ).join('');
+      return memo +
+        fieldHtml(id, 'src', '이미지 주소 *', d.src, { ph: 'https://...', hint: 'js-smart-img 클래스가 자동으로 붙습니다 (크기는 쇼핑몰이 처리).' }) +
+        fieldHtml(id, 'anchorId', '앵커 id (선택)', d.anchorId, { hint: '다른 영역에서 이 이미지로 이동시킬 때 사용. 예: a, b, section1', ph: '' }) +
+        '<div class="areas"><div class="areas-title">클릭 영역 (이미지맵)</div>' + areaRows +
+        '<button class="add-area" data-cid="' + id + '" data-addarea="1">+ 영역 추가</button></div>';
+    }
+    case 'br':
+      return '<div class="hint" style="font-size:12.5px;color:#98a1ab;">줄바꿈 &lt;br&gt; 한 개를 삽입합니다. 여러 개 필요하면 컴포넌트를 여러 번 추가하세요.</div>';
+    case 'modal':
+      return memo +
+        fieldHtml(id, 'num', '모달 번호 *', d.num, { hint: '이 모달을 여는 영역의 "모달 번호"와 동일해야 합니다.', ph: '01' }) +
+        fieldHtml(id, 'src', '모달 안 이미지 주소 *', d.src, { ph: 'https://...' });
+    case 'goods':
+      return memo +
+        fieldHtml(id, 'num', '진열 번호 * (js-sgl 뒤 숫자)', d.num, { hint: '다른 페이지와 중복되면 안 됩니다. 예: 072', ph: '072' }) +
+        fieldHtml(id, 'codes', '상품코드 목록 *', d.codes, { textarea: true, hint: '쉼표·줄바꿈·공백 모두 구분자로 인식합니다.', ph: '1000002246, 1000002348, ...' });
+    case 'video':
+      return memo +
+        radioHtml(id, 'device', d.device, [['pc', 'PC (750×400)'], ['mo', '모바일 (반응형 16:9)']]) +
+        fieldHtml(id, 'url', 'YouTube 주소 *', d.url, { hint: 'youtube.com/watch, youtu.be, embed 주소 모두 가능 — 자동으로 embed 형식으로 변환됩니다.', ph: 'https://www.youtube.com/watch?v=...' });
+    case 'floating':
+      return memo +
+        radioHtml(id, 'device', d.device, [['pc', 'PC (750px, bottom 45px)'], ['mo', '모바일 (100%, bottom 60px)']]) +
+        fieldHtml(id, 'landing', '랜딩 주소 *', d.landing, { ph: '/goods/event_sale.php?sno=360' }) +
+        fieldHtml(id, 'src', '버튼 이미지 주소 *', d.src, { ph: 'https://...' });
+    case 'raw':
+      return memo +
+        fieldHtml(id, 'html', 'HTML 직접 입력', d.html, { textarea: true, ph: '<div>...</div>' });
+  }
+}
+
+function renderAll() {
+  if (!state.components.length) {
+    $list.innerHTML = '<div class="empty-msg">아래 [+ 컴포넌트 추가] 버튼으로 첫 컴포넌트를 추가하세요.<br>전체 결과물은 자동으로 &lt;center&gt;로 감싸집니다.</div>';
+  } else {
+    $list.innerHTML = state.components.map((c, i) =>
+      '<div class="comp" data-id="' + c.id + '">' +
+      '<div class="comp-head">' +
+      '<span class="num">' + (i + 1) + '</span>' +
+      '<select data-cid="' + c.id + '" data-key="__type">' +
+      Object.entries(TYPES).map(([v, l]) => '<option value="' + v + '"' + (c.type === v ? ' selected' : '') + '>' + l + '</option>').join('') +
+      '</select>' +
+      '<button data-move="-1" data-cid="' + c.id + '" title="위로">↑</button>' +
+      '<button data-move="1" data-cid="' + c.id + '" title="아래로">↓</button>' +
+      '<button data-dup="1" data-cid="' + c.id + '" title="복제">복제</button>' +
+      '<button class="del" data-del="1" data-cid="' + c.id + '" title="삭제">삭제</button>' +
+      '</div>' +
+      '<div class="comp-body">' + bodyHtml(c) + '</div>' +
+      '</div>'
+    ).join('');
+  }
+  refreshPreview();
+  save();
+}
+
+function refreshPreview() {
+  const code = generate();
+  $output.textContent = code || '(컴포넌트를 추가하면 여기에 생성된 HTML이 표시됩니다)';
+  $warnings.innerHTML =
+    validate().map(w => '<div class="warn">⚠ ' + escHtml(w) + '</div>').join('') +
+    importNotes.map(n => '<div class="note">ℹ ' + escHtml(n) + '</div>').join('');
+  scheduleRender();
+}
+
+/* ================= 이벤트 ================= */
+function findComp(cid) { return state.components.find(c => c.id === Number(cid)); }
+
+document.getElementById('btnAdd').addEventListener('click', () => addComponent('image'));
+
+$list.addEventListener('input', e => {
+  const t = e.target, cid = t.dataset.cid;
+  if (!cid) return;
+  const c = findComp(cid);
+  if (!c) return;
+  if (t.dataset.akey !== undefined && t.dataset.area !== undefined) {
+    c.data.areas[Number(t.dataset.area)][t.dataset.akey] = t.value;
+    if (t.dataset.akey === 'action') { renderAll(); return; } // placeholder 갱신
+    refreshPreview(); save();
+    return;
+  }
+  const key = t.dataset.key;
+  if (key === '__type') {
+    c.type = t.value;
+    c.data = defaultData(t.value);
+    renderAll();
+    return;
+  }
+  if (t.type === 'checkbox') c.data[key] = t.checked;
+  else c.data[key] = t.value;
+  refreshPreview(); save();
+});
+
+$list.addEventListener('click', e => {
+  const t = e.target.closest('button');
+  if (!t) return;
+  const cid = t.dataset.cid;
+  const c = findComp(cid);
+  if (!c) return;
+  if (t.dataset.addarea) {
+    c.data.areas.push({ coords: '', action: 'link', value: '' });
+    renderAll();
+  } else if (t.dataset.pickarea !== undefined) {
+    openPicker(c, Number(t.dataset.pickarea));
+  } else if (t.dataset.delarea !== undefined) {
+    c.data.areas.splice(Number(t.dataset.delarea), 1);
+    renderAll();
+  } else if (t.dataset.del) {
+    state.components = state.components.filter(x => x.id !== c.id);
+    renderAll();
+  } else if (t.dataset.dup) {
+    const idx = state.components.indexOf(c);
+    state.components.splice(idx + 1, 0, { id: uid++, type: c.type, data: JSON.parse(JSON.stringify(c.data)) });
+    renderAll();
+  } else if (t.dataset.move) {
+    const idx = state.components.indexOf(c);
+    const to = idx + Number(t.dataset.move);
+    if (to < 0 || to >= state.components.length) return;
+    state.components.splice(idx, 1);
+    state.components.splice(to, 0, c);
+    renderAll();
+  }
+});
+
+document.getElementById('btnCopy').addEventListener('click', async () => {
+  const code = generate();
+  if (!code) { toast('복사할 내용이 없습니다'); return; }
+  try {
+    await navigator.clipboard.writeText(code);
+    toast('클립보드에 복사되었습니다 ✓');
+  } catch (err) {
+    const ta = document.createElement('textarea');
+    ta.value = code;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    toast('클립보드에 복사되었습니다 ✓');
+  }
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  if (!state.components.length || confirm('작성 중인 모든 컴포넌트를 삭제할까요?')) {
+    state.components = [];
+    importNotes = [];
+    renderAll();
+  }
+});
+
+/* ================= HTML 불러오기 (역파싱) ================= */
+let importNotes = []; // 마지막 불러오기에서 생긴 안내 (미리보기 하단 표시, 저장 안 함)
+
+// 전처리: 수작업 찌꺼기 정리 (순수 함수 — node 테스트 가능)
+function sanitizeHtml(raw) {
+  return (raw || '')
+    .replace(/^\uFEFF/, '')
+    .replace(/[\u00A0\u2007\u202F\u3000]/g, ' ')      // NBSP류 → 일반 공백
+    .replace(/[\u200B-\u200D\u2060\uFEFF]/g, '')       // zero-width 문자 제거
+    .replace(/[\u201C\u201D]/g, '"')                    // 스마트 따옴표 → ASCII
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/%22(?=\s)/g, '"');                        // URL 끝 %22 오염 복원
+}
+
+// src 안전망: 전처리를 통과한 %22 오염 잔여물 제거
+function cleanSrc(src) {
+  return (src || '').replace(/%22.*$/, '').trim();
+}
+
+// 파일 디코딩: UTF-8 기본, 깨진 문자 많으면 EUC-KR 재시도
+function decodeHtmlBuffer(buf) {
+  const utf8 = new TextDecoder('utf-8').decode(buf);
+  const bad = (utf8.match(/\uFFFD/g) || []).length;
+  if (bad > 0) {
+    try {
+      const euckr = new TextDecoder('euc-kr').decode(buf);
+      if ((euckr.match(/\uFFFD/g) || []).length < bad) return euckr;
+    } catch (e) {}
+  }
+  return utf8;
+}
+
+// map → areas 배열. rect 아닌 shape가 섞여 있으면 null (호출부에서 raw 폴백)
+function parseAreas(mapEl) {
+  const areas = [];
+  for (const a of mapEl.querySelectorAll('area')) {
+    const shape = (a.getAttribute('shape') || 'rect').toLowerCase();
+    if (shape !== 'rect') return null;
+    const coords = (a.getAttribute('coords') || '').trim();
+    if (a.classList.contains('modal_open')) {
+      areas.push({ coords, action: 'modal', value: (a.getAttribute('data-target-id') || '').trim() });
+    } else {
+      const href = (a.getAttribute('href') || '').trim();
+      if (href.startsWith('#')) areas.push({ coords, action: 'anchor', value: href.slice(1) });
+      else areas.push({ coords, action: 'link', value: href });
+    }
+  }
+  return areas;
+}
+
+// 본 파서: HTML → 컴포넌트 목록 (id 없이 {type, data}). notes에 안내 누적
+function parseComponents(rawHtml, notes) {
+  const doc = new DOMParser().parseFromString(sanitizeHtml(rawHtml), 'text/html');
+  const top = [];
+  for (const n of doc.body.childNodes) {
+    if (n.nodeType === 1 && n.tagName === 'CENTER') top.push(...n.childNodes);
+    else top.push(n);
+  }
+
+  const comps = [];
+  const usedMaps = new Set();
+  let memo = [];
+  const takeMemo = () => { const m = memo.join(' / '); memo = []; return m; };
+  const push = (type, data) => comps.push({ type, data });
+  const rawFallback = (html, note) => {
+    push('raw', { memo: takeMemo(), html: html.trim() });
+    if (note) notes.push(note);
+  };
+  const videoComp = (iframe) => ({
+    memo: takeMemo(),
+    device: iframe.getAttribute('width') === '750' ? 'pc' : 'mo',
+    url: (iframe.getAttribute('src') || '').trim(),
+  });
+
+  for (const n of top) {
+    if (n.nodeType === 8) { const t = n.data.trim(); if (t) memo.push(t); continue; }
+    if (n.nodeType === 3) {
+      if (n.data.replace(/\s+/g, '')) rawFallback(n.data, '태그 밖 텍스트를 [직접 입력]으로 보존했습니다.');
+      continue;
+    }
+    if (n.nodeType !== 1) continue;
+    const tag = n.tagName;
+
+    if (tag === 'BR') { push('br', { memo: takeMemo() }); continue; }
+
+    if (tag === 'MAP') {
+      const name = n.getAttribute('name') || '';
+      if (!usedMaps.has(name)) rawFallback(n.outerHTML, '소속 이미지가 없는 <map name="' + name + '">을 [직접 입력]으로 보존했습니다.');
+      continue;
+    }
+
+    if (tag === 'IMG') {
+      const data = {
+        memo: takeMemo(),
+        src: cleanSrc(n.getAttribute('src')),
+        anchorId: (n.getAttribute('id') || '').trim(),
+        areas: [],
+      };
+      const usemap = (n.getAttribute('usemap') || '').replace(/^#/, '');
+      if (usemap) {
+        const mapEl = doc.querySelector('map[name="' + usemap.replace(/["\\]/g, '\\$&') + '"]');
+        if (mapEl) {
+          usedMaps.add(usemap);
+          const areas = parseAreas(mapEl);
+          if (areas === null) {
+            memo = data.memo ? [data.memo] : [];
+            rawFallback(n.outerHTML + '\n' + mapEl.outerHTML, 'rect가 아닌 클릭 영역이 있어 이미지+맵을 [직접 입력]으로 보존했습니다.');
+            continue;
+          }
+          data.areas = areas; // 같은 map을 공유하는 이미지마다 복제됨
+        } else {
+          notes.push('usemap "#' + usemap + '"에 해당하는 <map>이 없어 클릭 영역 없이 불러왔습니다.');
+        }
+      }
+      if (!data.src) notes.push('이미지 주소(src)가 빈 이미지가 있습니다 — 확인하세요.');
+      push('image', data);
+      continue;
+    }
+
+    if (tag === 'IFRAME' && /youtube\.com|youtu\.be/.test(n.getAttribute('src') || '')) {
+      push('video', videoComp(n));
+      continue;
+    }
+
+    if (tag === 'DIV') {
+      if (n.classList.contains('modal')) {
+        const num = (n.getAttribute('data-target-id') || (n.className.match(/popup(\w+)/) || [])[1] || '').trim();
+        const img = n.querySelector('.imgWrap img[src], img[src]');
+        if (!img) notes.push('모달 "' + num + '" 안에서 이미지를 찾지 못했습니다.');
+        push('modal', { memo: takeMemo(), num, src: img ? cleanSrc(img.getAttribute('src')) : '' });
+        continue;
+      }
+      if (n.classList.contains('saleGoodsList')) {
+        const num = ((n.className.match(/js-sgl(\S+)/) || [])[1] || '').trim();
+        const codes = (n.getAttribute('data-goodsarr') || '').split(/[\s,]+/).filter(Boolean).join(',');
+        push('goods', { memo: takeMemo(), num, codes });
+        continue;
+      }
+      const iframe = n.querySelector('iframe[src*="youtube.com"], iframe[src*="youtu.be"]');
+      if (iframe) { push('video', videoComp(iframe)); continue; }
+
+      const fixedEl = [n, ...n.querySelectorAll('div')].find(el => /position\s*:\s*fixed/i.test(el.getAttribute('style') || ''));
+      if (fixedEl) {
+        const aEl = n.querySelector('a[href]');
+        const img = n.querySelector('img[src]');
+        const bottom = ((fixedEl.getAttribute('style') || '').match(/bottom\s*:\s*(\d+)/i) || [])[1];
+        const device = bottom === '45' ? 'pc'
+          : bottom === '60' ? 'mo'
+          : /750px/.test((img && img.getAttribute('style')) || '') ? 'pc' : 'mo';
+        push('floating', {
+          memo: takeMemo(),
+          device,
+          landing: aEl ? (aEl.getAttribute('href') || '').trim() : '',
+          src: img ? cleanSrc(img.getAttribute('src')) : '',
+        });
+        continue;
+      }
+    }
+
+    rawFallback(n.outerHTML, '인식하지 못한 <' + tag.toLowerCase() + '> 블록을 [직접 입력]으로 보존했습니다.');
+  }
+  if (memo.length) push('raw', { memo: takeMemo(), html: '' }); // 끝에 남은 주석 보존
+  return comps;
+}
+
+/* ---------- 불러오기 UI ---------- */
+const $importModal = document.getElementById('importModal');
+const $importText = document.getElementById('importText');
+const $importFile = document.getElementById('importFile');
+
+document.getElementById('btnImport').addEventListener('click', () => {
+  $importText.value = '';
+  $importFile.value = '';
+  $importModal.hidden = false;
+  $importText.focus();
+});
+function closeImport() { $importModal.hidden = true; }
+document.getElementById('importCancel').addEventListener('click', closeImport);
+$importModal.addEventListener('click', e => { if (e.target === $importModal) closeImport(); });
+
+$importFile.addEventListener('change', () => {
+  const f = $importFile.files && $importFile.files[0];
+  if (!f) return;
+  f.arrayBuffer().then(buf => {
+    $importText.value = decodeHtmlBuffer(buf);
+    toast('파일을 읽었습니다 — [불러오기]를 누르세요');
+  }).catch(() => toast('파일을 읽지 못했습니다'));
+});
+
+document.getElementById('importRun').addEventListener('click', () => {
+  const src = $importText.value.trim();
+  if (!src) { toast('불러올 HTML을 선택하거나 붙여넣으세요'); return; }
+  const mode = document.querySelector('input[name="importMode"]:checked').value;
+  if (mode === 'replace' && state.components.length &&
+      !confirm('현재 작성 중인 컴포넌트 ' + state.components.length + '개를 모두 삭제하고 불러온 내용으로 교체합니다. 계속할까요?')) return;
+
+  const notes = [];
+  const comps = parseComponents(src, notes);
+  if (!comps.length) { toast('인식할 수 있는 컴포넌트가 없습니다'); return; }
+
+  importNotes = notes;
+  const withIds = comps.map(c => ({ id: uid++, type: c.type, data: Object.assign(defaultData(c.type), c.data) }));
+  if (mode === 'replace') state.components = withIds;
+  else state.components.push(...withIds);
+  renderAll();
+  closeImport();
+
+  const counts = {};
+  for (const c of comps) counts[c.type] = (counts[c.type] || 0) + 1;
+  const label = { image: '이미지', br: '줄바꿈', modal: '모달', goods: '제품리스트', video: '영상', floating: '플로팅', raw: '직접입력' };
+  toast('불러오기 완료 — ' + Object.entries(counts).map(([t, n]) => label[t] + ' ' + n).join(' · '));
+});
+
+/* ================= 영역 따기 (coords picker) ================= */
+const $picker = document.getElementById('picker');
+const $pickerImg = document.getElementById('pickerImg');
+const $pickerStage = document.getElementById('pickerStage');
+const $pickerCoords = document.getElementById('pickerCoords');
+const $pickerApply = document.getElementById('pickerApply');
+const $pickerZoom = document.getElementById('pickerZoom');
+let pick = null; // { cid, idx, rect: [x1,y1,x2,y2]|null, start: [x,y]|null, dragging }
+
+function parseCoords(s) {
+  const n = (s || '').split(',').map(v => Number(v.trim()));
+  return (n.length === 4 && n.every(v => Number.isFinite(v))) ? n : null;
+}
+
+function openPicker(c, idx) {
+  const src = (c.data.src || '').trim();
+  if (!src) { toast('먼저 이미지 주소를 입력하세요'); return; }
+  pick = { cid: c.id, idx, rect: parseCoords(c.data.areas[idx].coords), start: null, dragging: false };
+  $pickerApply.disabled = !pick.rect;
+  $picker.hidden = false;
+  $pickerImg.src = src;
+  if ($pickerImg.complete && $pickerImg.naturalWidth) drawPicker();
+}
+$pickerImg.addEventListener('load', () => { if (pick) drawPicker(); });
+$pickerImg.addEventListener('error', () => {
+  if (!pick) return;
+  toast('이미지를 불러올 수 없습니다 — 주소를 확인하세요');
+  closePicker();
+});
+
+function closePicker() {
+  pick = null;
+  $picker.hidden = true;
+  $pickerImg.removeAttribute('src');
+}
+
+function pickerScale() { // 표시px → 원본px 배율
+  return $pickerImg.naturalWidth ? $pickerImg.naturalWidth / $pickerImg.clientWidth : 1;
+}
+
+function drawPicker() {
+  $pickerStage.querySelectorAll('.pk-box').forEach(el => el.remove());
+  const c = pick && findComp(pick.cid);
+  if (!c) return;
+  const s = pickerScale();
+  const box = (r, cls, tag) => {
+    const el = document.createElement('div');
+    el.className = 'pk-box ' + cls;
+    el.style.left = (Math.min(r[0], r[2]) / s) + 'px';
+    el.style.top = (Math.min(r[1], r[3]) / s) + 'px';
+    el.style.width = (Math.abs(r[2] - r[0]) / s) + 'px';
+    el.style.height = (Math.abs(r[3] - r[1]) / s) + 'px';
+    if (tag) el.innerHTML = '<span class="tag">' + escHtml(tag) + '</span>';
+    $pickerStage.appendChild(el);
+  };
+  c.data.areas.forEach((a, i) => {
+    if (i === pick.idx) return;
+    const r = parseCoords(a.coords);
+    if (r) box(r, 'other', '영역 ' + (i + 1));
+  });
+  if (pick.rect) box(pick.rect, 'sel');
+  $pickerCoords.textContent = pick.rect ? pick.rect.map(Math.round).join(',') : '—';
+  $pickerApply.disabled = !pick.rect;
+}
+
+function natPoint(e) {
+  const r = $pickerImg.getBoundingClientRect();
+  const s = pickerScale();
+  const x = Math.max(0, Math.min($pickerImg.naturalWidth, (e.clientX - r.left) * s));
+  const y = Math.max(0, Math.min($pickerImg.naturalHeight, (e.clientY - r.top) * s));
+  return [Math.round(x), Math.round(y)];
+}
+
+$pickerStage.addEventListener('mousedown', e => {
+  if (!pick || !$pickerImg.naturalWidth) return;
+  e.preventDefault();
+  pick.start = natPoint(e);
+  pick.rect = [...pick.start, ...pick.start];
+  pick.dragging = true;
+  drawPicker();
+});
+document.addEventListener('mousemove', e => {
+  if (!pick || !pick.dragging) return;
+  const p = natPoint(e);
+  pick.rect = [
+    Math.min(pick.start[0], p[0]), Math.min(pick.start[1], p[1]),
+    Math.max(pick.start[0], p[0]), Math.max(pick.start[1], p[1]),
+  ];
+  drawPicker();
+});
+document.addEventListener('mouseup', () => { if (pick) pick.dragging = false; });
+
+$pickerApply.addEventListener('click', () => {
+  if (!pick || !pick.rect) return;
+  const c = findComp(pick.cid);
+  if (c && c.data.areas[pick.idx]) {
+    c.data.areas[pick.idx].coords = pick.rect.map(Math.round).join(',');
+    renderAll();
+    toast('영역 좌표가 입력되었습니다 ✓');
+  }
+  closePicker();
+});
+document.getElementById('pickerCancel').addEventListener('click', closePicker);
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (pick) closePicker();
+  else if (!$importModal.hidden) closeImport();
+});
+$pickerZoom.addEventListener('input', () => {
+  $pickerImg.style.width = $pickerZoom.value + 'px';
+  document.getElementById('pickerZoomVal').textContent = $pickerZoom.value + 'px';
+  if (pick) drawPicker();
+});
+window.addEventListener('resize', () => { if (pick) drawPicker(); });
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ================= 렌더링 미리보기 (탭) ================= */
+const $renderPane = document.getElementById('renderPane');
+const $renderFrame = document.getElementById('renderFrame');
+const $renderStatus = document.getElementById('renderStatus');
+const $tabCode = document.getElementById('tabCode');
+const $tabRender = document.getElementById('tabRender');
+const $devPc = document.getElementById('devPc');
+const $devMo = document.getElementById('devMo');
+const $chkAreas = document.getElementById('chkAreas');
+
+const UI_KEY = 'promo-html-generator-ui';
+let ui = { tab: 'code', device: 'pc', showAreas: false };
+function saveUi() { try { localStorage.setItem(UI_KEY, JSON.stringify(ui)); } catch (e) {} }
+function loadUi() { try { Object.assign(ui, JSON.parse(localStorage.getItem(UI_KEY)) || {}); } catch (e) {} }
+
+// 쉼(shim): result.html에서 확인한 실서비스 모달 CSS/JS·이미지맵 리스케일을 이식해 srcdoc 조립
+function buildRenderDoc(code, device, showAreas) {
+  const isPc = device === 'pc';
+  const css = [
+    'body{margin:0;font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif;}',
+    'img{vertical-align:top;max-width:100%;}',
+    'img.js-smart-img{width:' + (isPc ? '750px' : '100%') + ';height:auto;}',
+    /* 모달 — result.html [Jay] 모달팝업 CSS 이식 */
+    '.modal{display:none;position:fixed;top:60%;left:50%;transform:translate(-50%,-50%);z-index:101;}',
+    '.modal .modal_close{cursor:pointer;}',
+    '.modal.on{width:600px;max-width:92vw;transform:translate(-50%,0);top:20%;display:block;}',
+    '.modal .imgWrap{width:600px;height:600px;background:#fff;z-index:10;overflow:auto;padding:0 30px;box-sizing:border-box;}',
+    '.modal.on .imgWrap{width:100%;max-height:70vh;height:auto;padding:0;overflow:auto;}',
+    '.modal.on .imgWrap img{width:100%;}',
+    '.modal_dim{display:none;position:fixed;top:0;left:0;width:100%;height:100vh;background:black;opacity:.7;z-index:100;}',
+    '.modal_dim.on{display:block;}',
+    '.modal_close{color:white;float:right;font-weight:bold;font-size:30px;}',
+    'area{cursor:pointer;}',
+    /* 제품 리스트 플레이스홀더 */
+    '.saleGoodsList{box-sizing:border-box;width:' + (isPc ? '750px' : '96%') + ';margin:10px auto;padding:34px 12px;border:2px dashed #b9c2cc;border-radius:10px;background:#f4f6f9;color:#68727e;font-size:13px;font-weight:600;}',
+    /* 클릭 영역 오버레이 */
+    '.area-box{position:absolute;border:1.5px dashed rgba(255,82,82,.95);background:rgba(255,82,82,.12);pointer-events:none;z-index:50;}',
+    '.area-box span{position:absolute;top:0;left:0;background:rgba(255,82,82,.9);color:#fff;font-size:11px;padding:1px 6px;border-radius:0 0 6px 0;white-space:nowrap;}',
+  ].join('\n');
+
+  const js = `
+(function(){
+  var SHOW_AREAS = ${showAreas ? 'true' : 'false'};
+  function status(t){ parent.postMessage({type:'pv-status', text:t}, '*'); }
+
+  document.querySelectorAll('.saleGoodsList').forEach(function(el){
+    var m = el.className.match(/js-sgl\\S+/);
+    var n = (el.getAttribute('data-goodsarr') || '').split(',').filter(Boolean).length;
+    el.textContent = '제품 리스트 ' + (m ? m[0] : '') + ' · 상품 ' + n + '개 (쇼핑몰에서 자동 진열)';
+  });
+
+  /* 모달 열기/닫기 — 실서비스 jQuery 로직과 동일 동작 */
+  document.addEventListener('click', function(e){
+    var open = e.target.closest('.modal_open');
+    if (open) {
+      e.preventDefault();
+      var id = open.getAttribute('data-target-id') || '';
+      var m = document.querySelector('.popup' + id);
+      var dim = document.querySelector('.modal_dim');
+      if (!m) { status('\\u26A0 모달 "' + id + '"가 없어 열리지 않습니다 (컴포넌트 확인)'); return; }
+      if (m.classList.contains('on')) { m.classList.remove('on'); dim.classList.remove('on'); status('모달 ' + id + ' 닫힘'); }
+      else { m.classList.add('on'); dim.classList.add('on'); status('모달 ' + id + ' 열림'); }
+      return;
+    }
+    var close = e.target.closest('.modal_close');
+    if (close) {
+      e.preventDefault();
+      var cid = close.getAttribute('data-target-id') || '';
+      var cm = document.querySelector('.popup' + cid);
+      if (cm) cm.classList.remove('on');
+      var cdim = document.querySelector('.modal_dim');
+      if (cdim) cdim.classList.remove('on');
+      status('모달 ' + cid + ' 닫힘');
+      return;
+    }
+    var link = e.target.closest('a[href], area[href]');
+    if (link) {
+      e.preventDefault();
+      var href = link.getAttribute('href') || '';
+      if (href.charAt(0) === '#') {
+        var tgt = document.getElementById(href.slice(1));
+        if (tgt) { tgt.scrollIntoView({behavior:'smooth'}); status('앵커 이동: ' + href); }
+        else status('\\u26A0 앵커 ' + href + ' 대상 없음');
+      } else {
+        status('링크 (이동 안 함): ' + href);
+      }
+    }
+  });
+
+  /* 이미지맵 좌표 리스케일 — 실서비스 rwdImageMaps 대체 */
+  function rescale(){
+    document.querySelectorAll('img[usemap]').forEach(function(img){
+      if (!img.naturalWidth || !img.clientWidth) return;
+      var name = (img.getAttribute('usemap') || '').replace(/^#/, '');
+      var map = document.querySelector('map[name="' + name + '"]');
+      if (!map) return;
+      var s = img.clientWidth / img.naturalWidth;
+      map.querySelectorAll('area').forEach(function(a){
+        if (!a.dataset.orig) a.dataset.orig = a.getAttribute('coords') || '';
+        a.setAttribute('coords', a.dataset.orig.split(',').map(function(v){ return Math.round(parseFloat(v) * s); }).join(','));
+      });
+    });
+    if (SHOW_AREAS) drawBoxes();
+  }
+
+  function drawBoxes(){
+    document.querySelectorAll('.area-box').forEach(function(el){ el.remove(); });
+    document.querySelectorAll('img[usemap]').forEach(function(img){
+      var name = (img.getAttribute('usemap') || '').replace(/^#/, '');
+      var map = document.querySelector('map[name="' + name + '"]');
+      if (!map) return;
+      var r = img.getBoundingClientRect();
+      map.querySelectorAll('area').forEach(function(a){
+        var c = (a.getAttribute('coords') || '').split(',').map(Number);
+        if (c.length !== 4) return;
+        var b = document.createElement('div');
+        b.className = 'area-box';
+        b.style.left = (r.left + scrollX + Math.min(c[0], c[2])) + 'px';
+        b.style.top = (r.top + scrollY + Math.min(c[1], c[3])) + 'px';
+        b.style.width = Math.abs(c[2] - c[0]) + 'px';
+        b.style.height = Math.abs(c[3] - c[1]) + 'px';
+        var label = a.classList.contains('modal_open') ? '모달 ' + (a.getAttribute('data-target-id') || '')
+          : (a.getAttribute('href') || '').charAt(0) === '#' ? a.getAttribute('href')
+          : '링크';
+        var tag = document.createElement('span');
+        tag.textContent = label;
+        b.appendChild(tag);
+        document.body.appendChild(b);
+      });
+    });
+  }
+
+  addEventListener('load', rescale);
+  addEventListener('resize', rescale);
+  document.querySelectorAll('img').forEach(function(img){ img.addEventListener('load', rescale); });
+  rescale();
+})();
+`;
+  return '<!doctype html><html><head><meta charset="utf-8"><style>' + css + '</style></head><body>'
+    + code
+    + '\n<div class="modal_dim"></div>'
+    + '<scr' + 'ipt>' + js + '</scr' + 'ipt></body></html>';
+}
+
+let renderTimer = null;
+let renderDirty = true;
+
+function doRender() {
+  renderDirty = false;
+  const code = generate();
+  $renderFrame.srcdoc = code
+    ? buildRenderDoc(code, ui.device, ui.showAreas)
+    : '<body style="display:flex;align-items:center;justify-content:center;color:#98a1ab;font-family:sans-serif;font-size:14px;">컴포넌트를 추가하면 여기에 렌더링됩니다</body>';
+}
+
+function scheduleRender() {
+  renderDirty = true;
+  if (ui.tab !== 'render') return;
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(doRender, 300);
+}
+
+function applyUi() {
+  $tabCode.classList.toggle('active', ui.tab === 'code');
+  $tabRender.classList.toggle('active', ui.tab === 'render');
+  $output.hidden = ui.tab !== 'code';
+  $renderPane.hidden = ui.tab !== 'render';
+  $devPc.classList.toggle('on', ui.device === 'pc');
+  $devMo.classList.toggle('on', ui.device === 'mo');
+  $renderFrame.classList.toggle('mo', ui.device === 'mo');
+  $chkAreas.checked = ui.showAreas;
+  if (ui.tab === 'render' && renderDirty) doRender();
+}
+
+$tabCode.addEventListener('click', () => { ui.tab = 'code'; saveUi(); applyUi(); });
+$tabRender.addEventListener('click', () => { ui.tab = 'render'; saveUi(); applyUi(); });
+$devPc.addEventListener('click', () => { ui.device = 'pc'; saveUi(); applyUi(); doRender(); });
+$devMo.addEventListener('click', () => { ui.device = 'mo'; saveUi(); applyUi(); doRender(); });
+$chkAreas.addEventListener('change', () => { ui.showAreas = $chkAreas.checked; saveUi(); doRender(); });
+
+window.addEventListener('message', e => {
+  if (e.data && e.data.type === 'pv-status') $renderStatus.textContent = e.data.text;
+});
+
+/* ================= 저장/복원 ================= */
+const LS_KEY = 'promo-html-generator';
+function save() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      state = JSON.parse(raw);
+      uid = state.components.reduce((m, c) => Math.max(m, c.id), 0) + 1;
+    }
+  } catch (e) {}
+}
+
+loadUi();
+load();
+renderAll();
+applyUi();
+</script>
+</body>
+</html>

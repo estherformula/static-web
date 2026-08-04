@@ -288,6 +288,16 @@ const TYPES = {
   raw:      '직접 입력 (자유 HTML)',
 };
 
+// 상품상세 상대주소 (에스더몰/고도몰). 영역 액션 '상품상세'는 상품코드만 입력받아 이 주소를 앞에 붙인다.
+const GOODS_VIEW_PATH = '/goods/goods_view.php?goodsNo=';
+
+// 상품코드 정규화: 코드만 입력해도, 실수로 전체 URL을 붙여넣어도 코드만 추출
+function goodsCode(value) {
+  const v = (value || '').trim();
+  const m = v.match(/goodsNo=([^&\s]+)/);
+  return m ? m[1] : v;
+}
+
 let state = { components: [] };
 let uid = 1;
 
@@ -350,6 +360,8 @@ function genComponent(c) {
             out.push('<area class="modal_open" data-target-id="' + escAttr(a.value) + '" coords="' + escAttr(a.coords) + '" shape="rect">');
           } else if (a.action === 'anchor') {
             out.push('<area coords="' + escAttr(a.coords) + '" shape="rect" href="#' + escAttr(a.value.replace(/^#/, '')) + '">');
+          } else if (a.action === 'goodsview') {
+            out.push('<area coords="' + escAttr(a.coords) + '" shape="rect" href="' + GOODS_VIEW_PATH + escAttr(goodsCode(a.value)) + '">');
           } else {
             out.push('<area coords="' + escAttr(a.coords) + '" shape="rect" href="' + escAttr(a.value) + '">');
           }
@@ -476,11 +488,12 @@ function bodyHtml(c) {
         '<input type="text" data-cid="' + id + '" data-area="' + i + '" data-akey="coords" value="' + escHtml(a.coords) + '" placeholder="coords: 54,363,705,577">' +
         '<select data-cid="' + id + '" data-area="' + i + '" data-akey="action">' +
         '<option value="link"' + (a.action === 'link' ? ' selected' : '') + '>링크 이동</option>' +
+        '<option value="goodsview"' + (a.action === 'goodsview' ? ' selected' : '') + '>상품상세</option>' +
         '<option value="anchor"' + (a.action === 'anchor' ? ' selected' : '') + '>앵커 이동</option>' +
         '<option value="modal"' + (a.action === 'modal' ? ' selected' : '') + '>모달 열기</option>' +
         '</select>' +
         '<input type="text" data-cid="' + id + '" data-area="' + i + '" data-akey="value" value="' + escHtml(a.value) + '" placeholder="' +
-          (a.action === 'modal' ? '모달 번호 (예: 01)' : a.action === 'anchor' ? '앵커명 (예: a)' : '링크 주소') + '">' +
+          (a.action === 'modal' ? '모달 번호 (예: 01)' : a.action === 'anchor' ? '앵커명 (예: a)' : a.action === 'goodsview' ? '상품코드 (예: 1000002272)' : '링크 주소') + '">' +
         '<button class="pick" data-cid="' + id + '" data-pickarea="' + i + '" title="이미지에서 드래그로 좌표 지정">따기</button>' +
         '<button data-cid="' + id + '" data-delarea="' + i + '" title="영역 삭제">✕</button>' +
         '</div>'
@@ -677,6 +690,7 @@ function parseAreas(mapEl) {
     } else {
       const href = (a.getAttribute('href') || '').trim();
       if (href.startsWith('#')) areas.push({ coords, action: 'anchor', value: href.slice(1) });
+      else if (/\/goods\/goods_view\.php\?goodsNo=/.test(href)) areas.push({ coords, action: 'goodsview', value: goodsCode(href) });
       else areas.push({ coords, action: 'link', value: href });
     }
   }

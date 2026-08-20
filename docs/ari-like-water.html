@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아리네와 수영장</title>
+<style>
+  :root {
+    --blue: #0e7490;
+    --blue-light: #e0f2fe;
+    --blue-deep: #0c4a6e;
+    --accent: #f59e0b;
+    --text: #1e293b;
+    --muted: #64748b;
+    --card: #ffffff;
+    --bg: #f0f9ff;
+    --border: #e2e8f0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Apple SD Gothic Neo", "Noto Sans KR", -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 60px;
+  }
+  .hero {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0e7490 100%);
+    color: #fff;
+    text-align: center;
+    padding: 48px 20px 40px;
+  }
+  .hero .emoji { font-size: 48px; }
+  .hero h1 { font-size: 32px; margin: 8px 0 4px; letter-spacing: -0.5px; }
+  .hero .sub { font-size: 16px; opacity: 0.9; }
+  .hero .badges { margin-top: 16px; }
+  .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin: 3px;
+    font-size: 14px;
+  }
+  .container { max-width: 720px; margin: -24px auto 0; padding: 0 16px; }
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(14,116,144,0.08);
+    padding: 22px 24px;
+    margin-bottom: 18px;
+  }
+  .card h2 {
+    font-size: 18px;
+    color: var(--blue-deep);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--blue-light);
+  }
+  .info-grid { display: grid; grid-template-columns: 110px 1fr; row-gap: 8px; column-gap: 12px; font-size: 15px; }
+  .info-grid .k { color: var(--muted); font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: var(--blue-light); color: var(--blue-deep); font-size: 13px; }
+  tr.highlight { background: #fef9c3; font-weight: 700; }
+  .note {
+    background: #fff7ed;
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 14px;
+    margin-top: 12px;
+  }
+  ul.check { list-style: none; font-size: 15px; }
+  ul.check li { padding: 4px 0; }
+  ul.check li::before { content: "☐ "; color: var(--blue); }
+  ul.check li.must::before { content: "★ "; color: var(--accent); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 520px) { .cols { grid-template-columns: 1fr; } }
+  .total {
+    background: var(--blue-deep);
+    color: #fff;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 15px;
+  }
+  .total strong { font-size: 22px; }
+  .footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="emoji">🏊‍♂️🌊</div>
+  <h1>아리네와 수영장</h1>
+  <div class="sub">2026년 8월 23일 (일) · 6명</div>
+  <div class="badges">
+    <span class="badge">📍 파주 뮌스터담</span>
+    <span class="badge">⏰ 09:00 ~ 17:00</span>
+    <span class="badge">👥 6명</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <h2>📌 장소 정보</h2>
+    <div class="info-grid">
+      <div class="k">상호명</div><div>뮌스터담카페앤펍</div>
+      <div class="k">주소</div><div>경기 파주시 운정로 113-175</div>
+      <div class="k">지도</div><div><a href="https://naver.me/5jJTzugA" style="color:var(--blue);font-weight:600" target="_blank">네이버 지도에서 보기 ↗</a></div>
+      <div class="k">이용권</div><div>주말 주간권 09:00~17:00 <span style="color:var(--muted)">(휴게 13:00~14:00)</span></div>
+      <div class="k">평상</div><div>6인 기준 55,000원 · 대여 필수 · 최대 8인 (1인 추가 일반 10,000 / 미취학 5,000)</div>
+      <div class="k">입장료</div><div>성인 17,000원 (미취학 15,000원)</div>
+      <div class="k">취사도구</div><div>대여 없음 — 식사는 외부 또는 준비 필요</div>
+    </div>
+    <div class="note">⚠️ 입장 인원 전원 평상 대여 및 입장료 결제 · <b>아쿠아슈즈 필수 착용</b></div>
+  </div>
+
+  <div class="card">
+    <h2>🎫 8월 이용권 안내 (8/18~8/31)</h2>
+    <table>
+      <tr><th>이용권</th><th>시간</th><th>휴게</th><th>6인 평상</th><th>입장료(성인/미취학)</th></tr>
+      <tr><td>평일권</td><td>11:00~19:00</td><td>없음</td><td>45,000</td><td>15,000 / 13,000</td></tr>
+      <tr class="highlight"><td>주말 주간권 ✅</td><td>09:00~17:00</td><td>13:00~14:00</td><td>55,000</td><td>17,000 / 15,000</td></tr>
+      <tr><td>주말 오후권</td><td>15:00~22:00</td><td>17:00~17:30</td><td>55,000</td><td>17,000 / 15,000</td></tr>
+      <tr><td>주말 야간권(금·토·일)</td><td>17:30~22:00</td><td>—</td><td>45,000</td><td>15,000 / 13,000</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>💰 예상 비용</h2>
+    <table>
+      <tr><th>항목</th><th>금액</th><th>비고</th></tr>
+      <tr><td>평상 대여 (6인)</td><td>55,000원</td><td>대여 필수</td></tr>
+      <tr><td>입장료 (성인 6명)</td><td>102,000원</td><td>17,000 × 6</td></tr>
+      <tr><td>식사 · 간식</td><td>미정</td><td>취사도구 없음</td></tr>
+    </table>
+    <div class="total">
+      <span>고정비 합계 (1인당 약 26,200원)</span>
+      <strong>157,000원</strong>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎒 준비물</h2>
+    <div class="cols">
+      <div>
+        <b style="color:var(--blue-deep)">개인</b>
+        <ul class="check">
+          <li>수영복</li>
+          <li>수건</li>
+          <li>여벌 옷</li>
+          <li>선크림</li>
+          <li>방수팩 (휴대폰)</li>
+          <li class="must">아쿠아슈즈 (필수 착용)</li>
+        </ul>
+      </div>
+      <div>
+        <b style="color:var(--blue-deep)">공동</b>
+        <ul class="check">
+          <li>튜브 / 물놀이 용품</li>
+          <li>돗자리</li>
+          <li>아이스박스 (음료·간식)</li>
+          <li>간식 / 음료</li>
+          <li>비닐봉투 (젖은 옷용)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">상세 문서: 위키 여행/아리네와-수영장.md · 작성 2026-08-20</div>
+</div>
+
+</body>
+</html>

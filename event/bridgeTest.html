@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>이벤트 연동 테스트</title>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            background-color: #f8f8f8;
+            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+            color: #222;
+        }
+
+        .container {
+            padding: 20px 16px 40px;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 20px;
+            margin: 0 0 6px;
+            font-weight: 600;
+        }
+
+        .desc {
+            font-size: 13px;
+            color: #888;
+            margin: 0 0 20px;
+            line-height: 1.5;
+        }
+
+        .section {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+
+        .section h2 {
+            font-size: 15px;
+            margin: 0 0 10px;
+            font-weight: 600;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 4px 0;
+        }
+
+        .row .k { color: #888; }
+        .row .v { font-family: ui-monospace, Menlo, monospace; }
+
+        .ok { color: #0a8f5a; }
+        .ng { color: #d63b3b; }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        button, a.btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin-top: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            background: #111927;
+            border: none;
+            border-radius: 10px;
+        }
+
+        button.sub, a.btn.sub {
+            color: #222;
+            background: #fff;
+            border: 1px solid #ccc;
+        }
+
+        button:disabled {
+            opacity: .5;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #888;
+            margin: 6px 0 0;
+            line-height: 1.5;
+        }
+
+        #log {
+            font-family: ui-monospace, Menlo, monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            background: #111927;
+            color: #e6e6e6;
+            border-radius: 8px;
+            padding: 12px;
+            min-height: 80px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>이벤트 연동 테스트</h1>
+    <p class="desc">이벤트 페이지 웹↔앱 연동 통로(estherpack) 테스트용 페이지입니다. 앱 웹뷰에서 열어야 동작합니다.<br>
+        이 페이지 제목("이벤트 연동 테스트")이 앱 상단 바에 보이면 웹뷰 제목 표시도 정상입니다.</p>
+
+    <div class="section">
+        <h2>1. 연동 통로 감지</h2>
+        <div class="row"><span class="k">통로</span><span class="v" id="channel">-</span></div>
+        <div class="row"><span class="k">platform</span><span class="v" id="platform">-</span></div>
+        <div class="row"><span class="k">appVersion</span><span class="v" id="appVersion">-</span></div>
+        <button class="sub" id="detectButton">다시 확인</button>
+        <p class="hint">estherpackInfo 는 버튼을 누를 때 읽습니다(Android는 로드 직후 값이 없을 수 있음).</p>
+    </div>
+
+    <div class="section">
+        <h2>2. 쿠폰 다운로드 (downloadCoupon)</h2>
+        <input id="couponCode" type="text" placeholder="쿠폰 등록 코드 입력" autocomplete="off" autocapitalize="characters" />
+        <button id="downloadButton">쿠폰 다운로드</button>
+        <p class="hint">결과 알럿은 앱이 띄웁니다. 회신 내용은 아래 로그에 남습니다. 두 번째 시도에서 CP-409-03(이미 등록)이 와야 정상입니다.</p>
+    </div>
+
+    <div class="section">
+        <h2>3. 예외 케이스</h2>
+        <button class="sub" id="unknownButton">모르는 action 보내기</button>
+        <button class="sub" id="emptyCodeButton">쿠폰 코드 없이 보내기</button>
+        <button class="sub" id="doubleButton">입력한 코드로 연속 2회 보내기</button>
+        <p class="hint">모르는 action과 코드 없는 요청은 UNKNOWN_ACTION 으로 회신되어야 합니다.</p>
+    </div>
+
+    <div class="section">
+        <h2>4. 딥링크 버튼</h2>
+        <a class="btn sub" href="estherpack://store">영양제 조합하기 (스토어 홈, 웹뷰 닫힘)</a>
+        <a class="btn sub" href="estherpack://common/surveyStart">문진하기 (닫으면 돌아옴)</a>
+        <a class="btn sub" href="estherpack://common/channelTalk?workflowId=780557">상담하기 (닫으면 돌아옴)</a>
+    </div>
+
+    <div class="section">
+        <h2>로그</h2>
+        <div id="log"></div>
+        <button class="sub" id="clearButton">로그 지우기</button>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var pending = {};
+        var seq = 0;
+
+        function log(text, cls) {
+            var el = document.getElementById('log');
+            var time = new Date().toTimeString().slice(0, 8);
+            var line = document.createElement('div');
+            if (cls) line.className = cls;
+            line.textContent = '[' + time + '] ' + text;
+            el.appendChild(line);
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function channel() {
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.estherpack) {
+                return 'ios';
+            }
+            if (window.estherpack && typeof window.estherpack.postMessage === 'function') {
+                return 'android';
+            }
+            return null;
+        }
+
+        function detect() {
+            var c = channel();
+            var info = window.estherpackInfo || {};
+            var channelEl = document.getElementById('channel');
+            channelEl.textContent = c ? '있음 (' + c + ')' : '없음';
+            channelEl.className = 'v ' + (c ? 'ok' : 'ng');
+            document.getElementById('platform').textContent = info.platform || '-';
+            document.getElementById('appVersion').textContent = info.appVersion || '-';
+            return c;
+        }
+
+        function send(action, payload) {
+            var c = detect();
+            if (!c) {
+                log('연동 통로 없음: 앱 업데이트 안내 대상 (구버전 앱 또는 모바일 브라우저)', 'ng');
+                alert('최신 버전 앱에서 이용할 수 있어요. 앱을 업데이트해 주세요.');
+                return null;
+            }
+            var requestId = 'req-' + Date.now() + '-' + (++seq);
+            var msg = { action: action, requestId: requestId, payload: payload || {} };
+            pending[requestId] = action;
+            log('→ ' + JSON.stringify(msg));
+            if (c === 'ios') {
+                window.webkit.messageHandlers.estherpack.postMessage(msg);
+            } else {
+                window.estherpack.postMessage(JSON.stringify(msg));
+            }
+            return requestId;
+        }
+
+        window.estherpackCallback = function (result) {
+            var action = pending[result && result.requestId];
+            delete pending[result && result.requestId];
+            log('← ' + (action || '?') + ' ' + JSON.stringify(result), result && result.success ? 'ok' : 'ng');
+            if (action === 'downloadCoupon') {
+                document.getElementById('downloadButton').disabled = false;
+            }
+        };
+
+        function couponCode() {
+            return document.getElementById('couponCode').value.trim();
+        }
+
+        document.getElementById('detectButton').onclick = detect;
+
+        document.getElementById('downloadButton').onclick = function () {
+            var code = couponCode();
+            if (!code) {
+                log('쿠폰 코드를 입력하세요', 'ng');
+                return;
+            }
+            // 회신 전까지만 잠시 막는다 (연타 방지)
+            if (send('downloadCoupon', { couponCode: code })) {
+                this.disabled = true;
+            }
+        };
+
+        document.getElementById('unknownButton').onclick = function () {
+            send('openGoodsSheet', { goodsIds: [1, 2] });
+        };
+
+        document.getElementById('emptyCodeButton').onclick = function () {
+            send('downloadCoupon', {});
+        };
+
+        document.getElementById('doubleButton').onclick = function () {
+            var code = couponCode();
+            if (!code) {
+                log('쿠폰 코드를 입력하세요', 'ng');
+                return;
+            }
+            send('downloadCoupon', { couponCode: code });
+            send('downloadCoupon', { couponCode: code });
+        };
+
+        document.getElementById('clearButton').onclick = function () {
+            document.getElementById('log').innerHTML = '';
+        };
+
+        detect();
+        log('페이지 로드. 로드 시점 estherpackInfo = ' + JSON.stringify(window.estherpackInfo || null));
+    })();
+</script>
+</body>
+</html>

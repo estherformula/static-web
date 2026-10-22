@@ -141,6 +141,7 @@
         <h2>2. 쿠폰 다운로드 (downloadCoupon)</h2>
         <input id="couponCode" type="text" placeholder="쿠폰 등록 코드 입력" autocomplete="off" autocapitalize="characters" />
         <button id="downloadButton">쿠폰 다운로드</button>
+        <button id="fixedDownloadButton" data-code="DOWNLOAD205686">쿠폰 다운로드 (DOWNLOAD205686)</button>
         <p class="hint">결과 알럿은 앱이 띄웁니다. 회신 내용은 아래 로그에 남습니다. 두 번째 시도에서 CP-409-03(이미 등록)이 와야 정상입니다.</p>
     </div>
 
@@ -227,6 +228,7 @@
             log('← ' + (action || '?') + ' ' + JSON.stringify(result), result && result.success ? 'ok' : 'ng');
             if (action === 'downloadCoupon') {
                 document.getElementById('downloadButton').disabled = false;
+                document.getElementById('fixedDownloadButton').disabled = false;
             }
         };
 
@@ -244,6 +246,13 @@
             }
             // 회신 전까지만 잠시 막는다 (연타 방지)
             if (send('downloadCoupon', { couponCode: code })) {
+                this.disabled = true;
+            }
+        };
+
+        // 고정 코드 쿠폰. 회신 전까지만 잠시 막는다
+        document.getElementById('fixedDownloadButton').onclick = function () {
+            if (send('downloadCoupon', { couponCode: this.getAttribute('data-code') })) {
                 this.disabled = true;
             }
         };

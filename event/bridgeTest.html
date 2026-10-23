@@ -141,7 +141,9 @@
         <h2>2. 쿠폰 다운로드 (downloadCoupon)</h2>
         <input id="couponCode" type="text" placeholder="쿠폰 등록 코드 입력" autocomplete="off" autocapitalize="characters" />
         <button id="downloadButton">쿠폰 다운로드</button>
-        <button id="fixedDownloadButton" data-code="DOWNLOAD205686">쿠폰 다운로드 (DOWNLOAD205686)</button>
+        <button class="fixedDownloadButton" data-code="DOWNLOAD205686">쿠폰 다운로드 (DOWNLOAD205686)</button>
+        <button class="fixedDownloadButton" data-code="DOWNLOAD706259">50% 할인쿠폰 다운로드 (DOWNLOAD706259)</button>
+        <button class="fixedDownloadButton" data-code="DOWNLOAD629103">40% 할인쿠폰 다운로드 (DOWNLOAD629103)</button>
         <p class="hint">결과 알럿은 앱이 띄웁니다. 회신 내용은 아래 로그에 남습니다. 두 번째 시도에서 CP-409-03(이미 등록)이 와야 정상입니다.</p>
     </div>
 
@@ -158,6 +160,7 @@
         <a class="btn sub" href="estherpack://store">영양제 조합하기 (스토어 홈, 웹뷰 닫힘)</a>
         <a class="btn sub" href="estherpack://common/surveyStart">문진하기 (닫으면 돌아옴)</a>
         <a class="btn sub" href="estherpack://common/channelTalk?workflowId=780557">상담하기 (닫으면 돌아옴)</a>
+        <a class="btn sub" href="estherpack://store/goods?goodsId=26">상품 상세 (상품 26, 웹뷰 닫힘)</a>
     </div>
 
     <div class="section">
@@ -171,6 +174,7 @@
     (function () {
         var pending = {};
         var seq = 0;
+        var fixedDownloadButtons = Array.prototype.slice.call(document.querySelectorAll('.fixedDownloadButton'));
 
         function log(text, cls) {
             var el = document.getElementById('log');
@@ -228,7 +232,9 @@
             log('← ' + (action || '?') + ' ' + JSON.stringify(result), result && result.success ? 'ok' : 'ng');
             if (action === 'downloadCoupon') {
                 document.getElementById('downloadButton').disabled = false;
-                document.getElementById('fixedDownloadButton').disabled = false;
+                fixedDownloadButtons.forEach(function (button) {
+                    button.disabled = false;
+                });
             }
         };
 
@@ -251,11 +257,13 @@
         };
 
         // 고정 코드 쿠폰. 회신 전까지만 잠시 막는다
-        document.getElementById('fixedDownloadButton').onclick = function () {
-            if (send('downloadCoupon', { couponCode: this.getAttribute('data-code') })) {
-                this.disabled = true;
-            }
-        };
+        fixedDownloadButtons.forEach(function (button) {
+            button.onclick = function () {
+                if (send('downloadCoupon', { couponCode: this.getAttribute('data-code') })) {
+                    this.disabled = true;
+                }
+            };
+        });
 
         document.getElementById('unknownButton').onclick = function () {
             send('openGoodsSheet', { goodsIds: [1, 2] });

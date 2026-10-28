@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>첫 구독 이벤트</title>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            background-color: #fff;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        /* 이미지 한 장 = 섹션 하나. 버튼은 이미지 위에 % 좌표로 겹친다 (원본 750px 기준) */
+        .section {
+            position: relative;
+            line-height: 0;
+        }
+
+        .section img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .hotspot {
+            position: absolute;
+            display: block;
+            border: none;
+            padding: 0;
+            margin: 0;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 12px;
+        }
+
+        .hotspot:active {
+            background: rgba(255, 255, 255, .15);
+        }
+
+        .hotspot:disabled {
+            cursor: default;
+        }
+
+        /* 영상 영역 (원본 04.jpg 의 검은 영역 자리) */
+        .video {
+            position: absolute;
+            overflow: hidden;
+        }
+
+        .video iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* 로컬 확인용: 주소 끝에 #hotspot 을 붙이면 누르는 영역이 보인다 */
+        .show-hotspot .hotspot,
+        .show-hotspot .video {
+            outline: 3px dashed #ff2d55;
+            background: rgba(255, 45, 85, .15);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="section">
+        <img src="images/01.jpg" alt="단 2주 첫 구독 이벤트, 지금 구독 시작하면 첫 달은 반값" />
+    </div>
+
+    <div class="section">
+        <img src="images/02.gif" alt="첫 달 결제 금액 22,500원, 이 가격에 전부 들어 있어요" />
+        <!-- 50% 쿠폰 다운받기: x 50~700, y 1513~1612 / 750x1850 -->
+        <button class="hotspot" id="couponButton" aria-label="50% 쿠폰 다운받기"
+                style="left: 6.667%; width: 86.667%; top: 81.784%; height: 5.405%;"></button>
+    </div>
+
+    <div class="section">
+        <img src="images/03.gif" alt="같은 팩은 하나도 없어요, 필요한 걸 알면 직접 담아 보세요" />
+        <!-- 영양제 골라 담기: x 50~700, y 1560~1659 / 750x1790 -->
+        <a class="hotspot" href="estherpack://store" aria-label="영양제 골라 담기"
+           style="left: 6.667%; width: 86.667%; top: 87.151%; height: 5.587%;"></a>
+    </div>
+
+    <div class="section">
+        <img src="images/04.jpg" alt="최화정 님은 이렇게 만들었어요" />
+        <!-- 영상 영역: x 0~750, y 393~792 / 750x1983. 영상 주소가 정해지면 iframe 을 넣는다 -->
+        <div class="video" id="videoArea"
+             style="left: 0; width: 100%; top: 19.818%; height: 20.172%;"></div>
+        <!-- 화정팩 그대로 담기: x 50~700, y 1593~1692 / 750x1983. TODO: 이동할 곳 미정 -->
+        <a class="hotspot" href="#" id="setButton" aria-label="화정팩 그대로 담기"
+           style="left: 6.667%; width: 86.667%; top: 80.333%; height: 5.043%;"></a>
+        <!-- 원하는 영양제 골라담기: x 50~700, y 1703~1802 / 750x1983 -->
+        <a class="hotspot" href="estherpack://store" aria-label="원하는 영양제 골라담기"
+           style="left: 6.667%; width: 86.667%; top: 85.880%; height: 5.043%;"></a>
+    </div>
+
+    <div class="section">
+        <img src="images/05.jpg" alt="잘 모르겠다면 문진해 보세요, 더 깊이 알고 싶다면 무료 상담 받으세요" />
+        <!-- 문진 시작하기: x 50~700, y 1081~1180 / 750x2960 -->
+        <a class="hotspot" href="estherpack://common/surveyStart" aria-label="문진 시작하기"
+           style="left: 6.667%; width: 86.667%; top: 36.520%; height: 3.378%;"></a>
+        <!-- 무료 상담 예약하기: x 50~700, y 2680~2779 / 750x2960 -->
+        <a class="hotspot" href="estherpack://common/channelTalk?workflowId=780557" aria-label="무료 상담 예약하기"
+           style="left: 6.667%; width: 86.667%; top: 90.541%; height: 3.378%;"></a>
+    </div>
+
+    <div class="section">
+        <img src="images/06.jpg" alt="꼭 필요한 영양제만, 하루 한 팩으로" />
+    </div>
+
+    <div class="section">
+        <img src="images/07.jpg" alt="걱정 말고 일단 시작해보세요, 언제든 그만둘 수 있어요" />
+    </div>
+
+    <div class="section">
+        <img src="images/08.jpg" alt="다른 고객님들의 후기를 확인하세요" />
+    </div>
+
+    <div class="section">
+        <img src="images/09.jpg" alt="에스더팩은 이렇게 구성되어 있어요" />
+    </div>
+
+    <div class="section">
+        <img src="images/10.jpg" alt="자주 묻는 질문" />
+    </div>
+
+    <div class="section">
+        <img src="images/11.jpg" alt="에스더포뮬러의 품질 그대로, 세상에 단 하나뿐인 당신을 위해 만듭니다" />
+    </div>
+</div>
+
+<script>
+    (function () {
+        // TODO: 운영 쿠폰 등록 코드로 교체. 지금 값은 dev 테스트용 50% 할인쿠폰 (bridgeTest.html 과 같음)
+        var COUPON_CODE = 'DOWNLOAD706259';
+
+        var pending = {};
+        var seq = 0;
+        var couponButton = document.getElementById('couponButton');
+
+        function channel() {
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.estherpack) {
+                return 'ios';
+            }
+            if (window.estherpack && typeof window.estherpack.postMessage === 'function') {
+                return 'android';
+            }
+            return null;
+        }
+
+        function send(action, payload) {
+            var c = channel();
+            if (!c) {
+                // 구버전 앱 또는 모바일 브라우저 (2-7)
+                alert('최신 버전 앱에서 이용할 수 있어요. 앱을 업데이트해 주세요.');
+                return null;
+            }
+            var requestId = 'req-' + Date.now() + '-' + (++seq);
+            var msg = { action: action, requestId: requestId, payload: payload || {} };
+            pending[requestId] = action;
+            if (c === 'ios') {
+                window.webkit.messageHandlers.estherpack.postMessage(msg);
+            } else {
+                window.estherpack.postMessage(JSON.stringify(msg));
+            }
+            return requestId;
+        }
+
+        // 결과 알럿은 앱이 띄운다. 웹은 버튼 잠금만 푼다
+        window.estherpackCallback = function (result) {
+            var action = pending[result && result.requestId];
+            delete pending[result && result.requestId];
+            if (action === 'downloadCoupon') {
+                couponButton.disabled = false;
+            }
+        };
+
+        couponButton.onclick = function () {
+            // 회신 전까지만 잠시 막는다 (연타 방지)
+            if (send('downloadCoupon', { couponCode: COUPON_CODE })) {
+                this.disabled = true;
+            }
+        };
+
+        // TODO: 화정팩 그대로 담기 이동할 곳 미정. 정해지기 전까지 눌러도 맨 위로 튀지 않게 막는다
+        document.getElementById('setButton').onclick = function (e) {
+            e.preventDefault();
+        };
+
+        function toggleHotspot() {
+            document.body.classList.toggle('show-hotspot', location.hash === '#hotspot');
+        }
+
+        window.addEventListener('hashchange', toggleHotspot);
+        toggleHotspot();
+    })();
+</script>
+</body>
+</html>

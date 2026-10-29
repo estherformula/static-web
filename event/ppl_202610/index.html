@@ -98,8 +98,8 @@
         <!-- 영상 영역: x 0~750, y 393~792 / 750x1983. 영상 주소가 정해지면 iframe 을 넣는다 -->
         <div class="video" id="videoArea"
              style="left: 0; width: 100%; top: 19.818%; height: 20.172%;"></div>
-        <!-- 화정팩 그대로 담기: x 50~700, y 1593~1692 / 750x1983. TODO: 이동할 곳 미정 -->
-        <a class="hotspot" href="#" id="setButton" aria-label="화정팩 그대로 담기"
+        <!-- 화정팩 그대로 담기: x 50~700, y 1593~1692 / 750x1983. 번들팩(상품 66) 상세로 이동 -->
+        <a class="hotspot" href="estherpack://store/goods?goodsId=66" id="setButton" aria-label="화정팩 그대로 담기"
            style="left: 6.667%; width: 86.667%; top: 80.333%; height: 5.043%;"></a>
         <!-- 원하는 영양제 골라담기: x 50~700, y 1703~1802 / 750x1983 -->
         <a class="hotspot" href="estherpack://store" aria-label="원하는 영양제 골라담기"
@@ -192,11 +192,6 @@
             if (send('downloadCoupon', { couponCode: COUPON_CODE })) {
                 this.disabled = true;
             }
-        };
-
-        // TODO: 화정팩 그대로 담기 이동할 곳 미정. 정해지기 전까지 눌러도 맨 위로 튀지 않게 막는다
-        document.getElementById('setButton').onclick = function (e) {
-            e.preventDefault();
         };
 
         function toggleHotspot() {
